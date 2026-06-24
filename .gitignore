@@ -1,0 +1,12 @@
+.next
+node_modules
+.tools
+.logs
+.env
+.env*.local
+!.env.example
+coverage
+dist
+*.tsbuildinfo
+drizzle
+public/uploads
