@@ -11,6 +11,15 @@ export const ALLOWED_DOCUMENT_MIME_TYPES = [
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
 ] as const;
 
+const ALLOWED_DOCUMENT_EXTENSIONS_BY_MIME_TYPE: Record<(typeof ALLOWED_DOCUMENT_MIME_TYPES)[number], readonly string[]> = {
+  "application/pdf": [".pdf"],
+  "image/jpeg": [".jpg", ".jpeg"],
+  "image/png": [".png"],
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [".docx"]
+};
+
+export const MAX_DOCUMENT_FILE_NAME_LENGTH = 180;
+
 export const documentMetadataSchema = z.object({
   companyId: uuidSchema,
   obligationId: optionalUuidSchema,
@@ -21,7 +30,9 @@ export const documentMetadataSchema = z.object({
 });
 
 export function validateDocumentFile(file: File) {
-  if (!ALLOWED_DOCUMENT_MIME_TYPES.includes(file.type as (typeof ALLOWED_DOCUMENT_MIME_TYPES)[number])) {
+  const mimeType = file.type as (typeof ALLOWED_DOCUMENT_MIME_TYPES)[number];
+
+  if (!ALLOWED_DOCUMENT_MIME_TYPES.includes(mimeType)) {
     return "Solo se permiten PDF, JPG, PNG y DOCX.";
   }
 
@@ -31,6 +42,19 @@ export function validateDocumentFile(file: File) {
 
   if (file.size > MAX_DOCUMENT_SIZE_BYTES) {
     return "El archivo supera el limite de 10 MB.";
+  }
+
+  const fileName = file.name.trim();
+
+  if (!fileName || fileName.length > MAX_DOCUMENT_FILE_NAME_LENGTH) {
+    return `El nombre del archivo debe tener entre 1 y ${MAX_DOCUMENT_FILE_NAME_LENGTH} caracteres.`;
+  }
+
+  const lowerName = fileName.toLowerCase();
+  const allowedExtensions = ALLOWED_DOCUMENT_EXTENSIONS_BY_MIME_TYPE[mimeType];
+
+  if (!allowedExtensions.some((extension) => lowerName.endsWith(extension))) {
+    return "La extension del archivo no coincide con el tipo permitido.";
   }
 
   return null;

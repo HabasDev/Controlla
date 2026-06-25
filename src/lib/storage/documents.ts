@@ -9,7 +9,7 @@ export function sanitizeFileName(fileName: string) {
   const normalized = fileName.normalize("NFKD").replace(/[\u0300-\u036f]/g, "");
   const safe = normalized.replace(/[^a-zA-Z0-9._-]/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "");
 
-  return safe || `documento-${randomUUID()}`;
+  return (safe || `documento-${randomUUID()}`).slice(0, 180);
 }
 
 export function buildDocumentStoragePath(input: {

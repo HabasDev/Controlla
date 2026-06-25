@@ -15,7 +15,7 @@ export async function POST(request: Request) {
   const stripe = getStripeClient();
 
   if (!stripe || !appEnv.stripeWebhookSecret) {
-    return NextResponse.json({ message: "Stripe no esta configurado." }, { status: 200 });
+    return NextResponse.json({ message: "Stripe no esta configurado." }, { status: 503 });
   }
 
   const signature = request.headers.get("stripe-signature");

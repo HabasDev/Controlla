@@ -6,7 +6,12 @@ import { requireDb } from "@/db";
 import { companyMembers, profiles } from "@/db/schema";
 import { requirePermission } from "@/lib/auth/session";
 import { getSupabaseAdminClient } from "@/lib/supabase/admin";
-import { invitationSchema, type InvitationInput } from "@/lib/validations/member";
+import {
+  invitationSchema,
+  memberAccessSchema,
+  updateMemberRoleSchema,
+  type InvitationInput
+} from "@/lib/validations/member";
 import { zodFieldErrors } from "@/lib/validations/shared";
 import { createActivityLog } from "@/modules/audit-log/service";
 import type { ActionResult, CompanyRole } from "@/types";
@@ -74,44 +79,79 @@ export async function updateMemberRoleAction(input: {
   userId: string;
   role: Exclude<CompanyRole, "owner">;
 }): Promise<ActionResult> {
-  const { user } = await requirePermission(input.companyId, "members:update-role");
+  const parsed = updateMemberRoleSchema.safeParse(input);
+
+  if (!parsed.success) {
+    return { ok: false, message: "Revisa el cambio de rol.", fieldErrors: zodFieldErrors(parsed.error) };
+  }
+
+  const { user } = await requirePermission(parsed.data.companyId, "members:update-role");
   const db = requireDb();
+  const target = await db.query.companyMembers.findFirst({
+    where: and(eq(companyMembers.companyId, parsed.data.companyId), eq(companyMembers.userId, parsed.data.userId))
+  });
+
+  if (!target) {
+    return { ok: false, message: "El usuario no pertenece a esta empresa." };
+  }
+
+  if (target.role === "owner") {
+    return { ok: false, message: "No se puede cambiar el rol del propietario desde esta pantalla." };
+  }
 
   await db
     .update(companyMembers)
-    .set({ role: input.role })
-    .where(and(eq(companyMembers.companyId, input.companyId), eq(companyMembers.userId, input.userId)));
+    .set({ role: parsed.data.role })
+    .where(and(eq(companyMembers.companyId, parsed.data.companyId), eq(companyMembers.userId, parsed.data.userId)));
 
   await createActivityLog({
-    companyId: input.companyId,
+    companyId: parsed.data.companyId,
     actorUserId: user.id,
     entityType: "member",
-    entityId: input.userId,
+    entityId: parsed.data.userId,
     action: "member.role_changed",
-    metadata: { role: input.role }
+    metadata: { role: parsed.data.role }
   });
 
   return { ok: true, message: "Rol actualizado." };
 }
 
 export async function deactivateMemberAction(input: { companyId: string; userId: string }): Promise<ActionResult> {
-  const { user } = await requirePermission(input.companyId, "members:update-role");
+  const parsed = memberAccessSchema.safeParse(input);
+
+  if (!parsed.success) {
+    return { ok: false, message: "Revisa el usuario seleccionado.", fieldErrors: zodFieldErrors(parsed.error) };
+  }
+
+  const { user } = await requirePermission(parsed.data.companyId, "members:update-role");
   const db = requireDb();
 
-  if (input.userId === user.id) {
+  if (parsed.data.userId === user.id) {
     return { ok: false, message: "No puedes desactivar tu propio acceso." };
+  }
+
+  const target = await db.query.companyMembers.findFirst({
+    where: and(eq(companyMembers.companyId, parsed.data.companyId), eq(companyMembers.userId, parsed.data.userId))
+  });
+
+  if (!target) {
+    return { ok: false, message: "El usuario no pertenece a esta empresa." };
+  }
+
+  if (target.role === "owner") {
+    return { ok: false, message: "No se puede desactivar al propietario." };
   }
 
   await db
     .update(companyMembers)
     .set({ status: "disabled" })
-    .where(and(eq(companyMembers.companyId, input.companyId), eq(companyMembers.userId, input.userId)));
+    .where(and(eq(companyMembers.companyId, parsed.data.companyId), eq(companyMembers.userId, parsed.data.userId)));
 
   await createActivityLog({
-    companyId: input.companyId,
+    companyId: parsed.data.companyId,
     actorUserId: user.id,
     entityType: "member",
-    entityId: input.userId,
+    entityId: parsed.data.userId,
     action: "member.role_changed",
     metadata: { status: "disabled" }
   });
@@ -120,22 +160,40 @@ export async function deactivateMemberAction(input: { companyId: string; userId:
 }
 
 export async function removeMemberAccessAction(input: { companyId: string; userId: string }): Promise<ActionResult> {
-  const { user } = await requirePermission(input.companyId, "members:update-role");
+  const parsed = memberAccessSchema.safeParse(input);
+
+  if (!parsed.success) {
+    return { ok: false, message: "Revisa el usuario seleccionado.", fieldErrors: zodFieldErrors(parsed.error) };
+  }
+
+  const { user } = await requirePermission(parsed.data.companyId, "members:update-role");
   const db = requireDb();
 
-  if (input.userId === user.id) {
+  if (parsed.data.userId === user.id) {
     return { ok: false, message: "No puedes eliminar tu propio acceso." };
+  }
+
+  const target = await db.query.companyMembers.findFirst({
+    where: and(eq(companyMembers.companyId, parsed.data.companyId), eq(companyMembers.userId, parsed.data.userId))
+  });
+
+  if (!target) {
+    return { ok: false, message: "El usuario no pertenece a esta empresa." };
+  }
+
+  if (target.role === "owner") {
+    return { ok: false, message: "No se puede eliminar el acceso del propietario." };
   }
 
   await db
     .delete(companyMembers)
-    .where(and(eq(companyMembers.companyId, input.companyId), eq(companyMembers.userId, input.userId)));
+    .where(and(eq(companyMembers.companyId, parsed.data.companyId), eq(companyMembers.userId, parsed.data.userId)));
 
   await createActivityLog({
-    companyId: input.companyId,
+    companyId: parsed.data.companyId,
     actorUserId: user.id,
     entityType: "member",
-    entityId: input.userId,
+    entityId: parsed.data.userId,
     action: "member.role_changed",
     metadata: { removed: true }
   });
