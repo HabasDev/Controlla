@@ -1,9 +1,12 @@
-import { AlertTriangle, Archive, CalendarClock, CheckCircle2, Clock3 } from "lucide-react";
+import Link from "next/link";
+import { AlertTriangle, CalendarClock, CheckCircle2, Clock3, FileText, Plus } from "lucide-react";
 
 import { MetricCard } from "@/components/dashboard/metric-card";
 import { ObligationBoard } from "@/components/dashboard/obligation-board";
 import { PageHeader } from "@/components/dashboard/page-header";
+import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { cn } from "@/lib/utils/cn";
 import { getDashboardData } from "@/modules/dashboard/data";
 
 export const metadata = {
@@ -26,11 +29,27 @@ export default async function DashboardPage() {
         description="Resumen operativo de obligaciones, activos, alertas y actividad reciente."
       />
       <div className="space-y-6 p-6">
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <div className="flex flex-wrap gap-3">
+          <Link className={cn(buttonVariants(), "gap-2")} href="/dashboard/obligaciones">
+            <Plus className="h-4 w-4" aria-hidden="true" />
+            Crear obligacion
+          </Link>
+          <Link className={cn(buttonVariants({ variant: "outline" }), "gap-2")} href="/dashboard/activos">
+            <Plus className="h-4 w-4" aria-hidden="true" />
+            Crear activo
+          </Link>
+          <Link className={cn(buttonVariants({ variant: "outline" }), "gap-2")} href="/dashboard/documentos">
+            <Plus className="h-4 w-4" aria-hidden="true" />
+            Subir documento
+          </Link>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
           <MetricCard icon={AlertTriangle} title="Obligaciones vencidas" tone="critical" value={data.stats.expired} />
+          <MetricCard icon={Clock3} title="Vencen hoy" tone="critical" value={data.stats.dueToday} />
           <MetricCard icon={Clock3} title="Vencen en 7 dias" tone="warning" value={data.stats.dueIn7} />
           <MetricCard icon={CalendarClock} title="Vencen en 30 dias" value={data.stats.dueIn30} />
-          <MetricCard icon={Archive} title="Activos" tone="success" value={data.stats.assets} />
+          <MetricCard icon={FileText} title="Documentos" tone="success" value={data.stats.documents} />
         </div>
 
         <div className="grid gap-4 xl:grid-cols-[1fr_360px]">

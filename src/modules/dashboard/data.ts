@@ -61,6 +61,7 @@ export async function getDashboardData() {
       const days = getDaysUntilDueDate(item.dueDate);
       return days >= 0 && days <= 7;
     }).length;
+    const dueToday = demoObligations.filter((item) => getDaysUntilDueDate(item.dueDate) === 0).length;
     const dueIn30 = demoObligations.filter((item) => {
       const days = getDaysUntilDueDate(item.dueDate);
       return days >= 0 && days <= 30;
@@ -71,9 +72,12 @@ export async function getDashboardData() {
       isDemo: true,
       stats: {
         expired,
+        dueToday,
         dueIn7,
         dueIn30,
-        assets: demoAssets.length
+        assets: demoAssets.length,
+        documents: demoDocuments.length,
+        obligations: demoObligations.length
       },
       obligations: demoObligations,
       alerts: demoNotifications,
@@ -124,6 +128,10 @@ export async function getDashboardData() {
     .select({ value: count() })
     .from(assets)
     .where(eq(assets.companyId, company.companyId));
+  const documentCount = await db
+    .select({ value: count() })
+    .from(documents)
+    .where(eq(documents.companyId, company.companyId));
 
   const activity = await db
     .select({
@@ -146,6 +154,7 @@ export async function getDashboardData() {
     isDemo: false,
     stats: {
       expired: dashboardObligations.filter((item) => item.computedStatus === "expired").length,
+      dueToday: dashboardObligations.filter((item) => getDaysUntilDueDate(item.dueDate, company.timezone) === 0).length,
       dueIn7: dashboardObligations.filter((item) => {
         const days = getDaysUntilDueDate(item.dueDate, company.timezone);
         return days >= 0 && days <= 7;
@@ -154,7 +163,9 @@ export async function getDashboardData() {
         const days = getDaysUntilDueDate(item.dueDate, company.timezone);
         return days >= 0 && days <= 30;
       }).length,
-      assets: assetCount[0]?.value ?? 0
+      assets: assetCount[0]?.value ?? 0,
+      documents: documentCount[0]?.value ?? 0,
+      obligations: dashboardObligations.length
     },
     obligations: dashboardObligations,
     alerts: [],
