@@ -17,49 +17,51 @@ const benefits = [
 const useCases = ["ITV y seguros", "Extintores", "Revisiones electricas", "Formacion PRL", "Licencias", "Contratos", "Dominios web", "Certificados SSL"];
 const sectors = ["Talleres", "Gimnasios", "Restaurantes", "Transporte", "Clinicas", "Comunidades"];
 const plans = [
-  { name: "Free", price: "0 EUR", detail: "Para validar el flujo con pocos activos.", features: ["15 activos", "2 usuarios", "Avisos basicos"] },
   { name: "Starter", price: "29 EUR", detail: "Para pymes con obligaciones recurrentes.", features: ["100 activos", "5 usuarios", "Documentos privados"] },
-  { name: "Business", price: "79 EUR", detail: "Para equipos con varias sedes.", features: ["500 activos", "20 usuarios", "Informes mensuales"] }
+  { name: "Business", price: "79 EUR", detail: "Para equipos con varias sedes.", features: ["500 activos", "20 usuarios", "Informes mensuales"] },
+  { name: "Enterprise", price: "A medida", detail: "Para operaciones con varias sociedades o requisitos avanzados.", features: ["Activos ilimitados", "Roles avanzados", "Acompanamiento"] }
 ];
 
 export default function MarketingPage() {
   return (
     <main className="bg-background">
-      <section className="relative min-h-[88vh] overflow-hidden text-white">
+      <section className="relative min-h-[88vh] w-full overflow-hidden text-white">
         <Image alt="Panel operativo de Controla" className="object-cover" fill priority sizes="100vw" src="/images/controla-hero.png" />
-        <div className="absolute inset-0 bg-slate-950/68" />
-        <div className="relative mx-auto flex min-h-[88vh] max-w-7xl flex-col justify-between px-6 py-6">
-          <nav className="flex items-center justify-between">
-            <Link className="flex items-center gap-2 text-lg font-semibold" href="/">
+        <div className="absolute inset-0 bg-slate-950/82" />
+        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(2,6,23,0.94)_0%,rgba(2,6,23,0.88)_36%,rgba(2,6,23,0.55)_68%,rgba(2,6,23,0.42)_100%)]" />
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(2,6,23,0.75)_0%,rgba(2,6,23,0.2)_42%,rgba(2,6,23,0.74)_100%)]" />
+        <div className="relative mx-auto flex min-h-[88vh] w-full max-w-7xl flex-col justify-between overflow-x-hidden px-6 py-6">
+          <nav className="hero-mobile-bound flex min-w-0 items-center justify-between gap-3 sm:max-w-full">
+            <Link className="flex min-w-0 items-center gap-2 text-lg font-semibold text-white drop-shadow" href="/">
               <ShieldCheck className="h-6 w-6 text-teal-200" aria-hidden="true" />
               Controla
             </Link>
-            <div className="flex items-center gap-2">
-              <Link className="hidden text-sm text-slate-200 hover:text-white sm:inline" href="/login">
+            <div className="flex shrink-0 items-center gap-2">
+              <Link className="hidden text-sm font-medium text-white drop-shadow hover:text-teal-100 sm:inline" href="/login">
                 Entrar
               </Link>
-              <Link className={cn(buttonVariants({ variant: "secondary", size: "sm" }), "bg-white text-slate-950 hover:bg-slate-100")} href="/register">
-                Probar gratis
+              <Link className={cn(buttonVariants({ variant: "secondary", size: "sm" }), "hidden bg-white text-slate-950 hover:bg-slate-100 min-[360px]:inline-flex")} href="/register">
+                Contratar
               </Link>
             </div>
           </nav>
 
-          <div className="max-w-3xl pb-16 pt-24">
-            <Badge className="mb-5 bg-white/[0.12] text-white" variant="outline">
+          <div className="hero-mobile-bound min-w-0 pb-16 pt-24">
+            <Badge className="mb-5 max-w-full whitespace-normal border-white/60 bg-slate-950/72 text-left leading-5 text-white shadow-lg shadow-slate-950/30" variant="outline">
               SaaS para caducidades, revisiones y documentacion
             </Badge>
-            <h1 className="max-w-3xl text-4xl font-semibold leading-tight sm:text-6xl">
+            <h1 className="max-w-full text-3xl font-semibold leading-tight text-white drop-shadow-[0_3px_18px_rgba(0,0,0,0.85)] sm:text-6xl">
               No vuelvas a olvidar una fecha critica para tu negocio.
             </h1>
-            <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-100">
+            <p className="mt-6 max-w-full text-base font-medium leading-7 text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.9)] sm:max-w-2xl sm:text-lg sm:leading-8">
               Controla seguros, ITV, extintores, mantenimientos, licencias, contratos y documentacion desde un solo lugar.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link className={cn(buttonVariants({ size: "lg" }), "bg-white text-slate-950 hover:bg-slate-100")} href="/register">
-                Probar gratis
+                Contratar ahora
                 <ArrowRight className="h-4 w-4" aria-hidden="true" />
               </Link>
-                <Link className={cn(buttonVariants({ variant: "outline", size: "lg" }), "border-white/50 bg-white/[0.08] text-white hover:bg-white/[0.14]")} href="#como-funciona">
+                <Link className={cn(buttonVariants({ variant: "outline", size: "lg" }), "border-white/70 bg-slate-950/52 text-white shadow-lg shadow-slate-950/20 hover:bg-slate-950/68 hover:text-white")} href="#como-funciona">
                 Ver como funciona
               </Link>
             </div>
@@ -67,9 +69,9 @@ export default function MarketingPage() {
 
           <div className="grid gap-3 pb-4 sm:grid-cols-3">
             {["Vencido", "Proximo a vencer", "Correcto"].map((label) => (
-              <div className="rounded-lg border border-white/[0.18] bg-white/10 p-3 backdrop-blur" key={label}>
-                <p className="text-sm text-slate-200">{label}</p>
-                <p className="mt-1 text-2xl font-semibold">{label === "Vencido" ? "3" : label === "Proximo a vencer" ? "12" : "86%"}</p>
+              <div className="rounded-lg border border-white/35 bg-slate-950/70 p-3 shadow-lg shadow-slate-950/30 backdrop-blur" key={label}>
+                <p className="text-sm font-medium text-white">{label}</p>
+                <p className="mt-1 text-2xl font-semibold text-white">{label === "Vencido" ? "3" : label === "Proximo a vencer" ? "12" : "86%"}</p>
               </div>
             ))}
           </div>
@@ -152,7 +154,7 @@ export default function MarketingPage() {
           <p>Controla. SaaS para fechas criticas y documentacion empresarial.</p>
           <div className="flex gap-4">
             <Link href="/login">Entrar</Link>
-            <Link href="/register">Probar gratis</Link>
+            <Link href="/register">Contratar</Link>
           </div>
         </div>
       </footer>

@@ -55,3 +55,14 @@ select {
 ::selection {
   background: hsl(var(--primary) / 0.18);
 }
+
+.hero-mobile-bound {
+  width: 100%;
+  max-width: min(21rem, calc(100vw - 3rem));
+}
+
+@media (min-width: 640px) {
+  .hero-mobile-bound {
+    max-width: 48rem;
+  }
+}
