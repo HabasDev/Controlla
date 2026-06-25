@@ -180,10 +180,14 @@ Abre `http://localhost:3000`.
 Comandos utiles:
 
 ```bash
+npm ci
 npm run typecheck
+npm run lint
 npm run test
 npm run build
 ```
+
+`npm run typecheck` genera primero los tipos de rutas de Next con `next typegen` y despues ejecuta TypeScript.
 
 ## Despliegue En Vercel
 
@@ -193,6 +197,16 @@ npm run build
 4. Ejecuta migraciones contra la base de produccion.
 5. Configura el webhook de Stripe apuntando a `/api/stripe/webhook`.
 6. Configura tareas programadas en Trigger.dev.
+
+## CI
+
+El repositorio incluye `.github/workflows/ci.yml` y ejecuta en `push` y `pull_request`:
+
+- `npm ci`
+- `npm run typecheck`
+- `npm run lint`
+- `npm run test`
+- `npm run build`
 
 ## Estructura
 
@@ -257,7 +271,12 @@ src/
 - Trigger.dev queda preparado como funciones invocables, pendiente de registrar en el runtime final.
 - El seed crea metadatos de documentos demo, pero no sube archivos PDF reales.
 - Las invitaciones requieren `SUPABASE_SERVICE_ROLE_KEY`.
+- Faltan pruebas de integracion contra una base Supabase real para validar RLS extremo a extremo.
 - No incluye IA, OCR, WhatsApp, app movil ni integraciones ERP.
+
+## Auditoria
+
+La auditoria tecnica y de producto para beta privada esta en `docs/IMPLEMENTATION_AUDIT.md`.
 
 ## Proximos Pasos
 
