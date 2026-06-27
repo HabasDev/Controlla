@@ -1,5 +1,5 @@
 import { InviteMemberForm } from "@/components/forms/invite-member-form";
-import { MemberAccessControls } from "@/components/dashboard/member-access-controls";
+import { MemberAccessControls } from "@/features/members/components/member-access-controls";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

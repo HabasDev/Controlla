@@ -2,7 +2,7 @@ import { randomUUID } from "crypto";
 
 import { and, eq } from "drizzle-orm";
 
-import { requireDb } from "@/db";
+import { loadEnvFiles } from "@/server/env/load-env-files";
 import {
   assets,
   companies,
@@ -17,8 +17,11 @@ import {
   subscriptions
 } from "@/db/schema";
 import { getTodayDateOnly } from "@/lib/date/obligations";
-import { getSupabaseAdminClient } from "@/lib/supabase/admin";
 import { buildDefaultReminderRules } from "@/modules/reminders/service";
+import { closeScriptDb, getScriptDb } from "@/server/db/script-client";
+import { getScriptSupabaseAdminClient } from "@/server/supabase/script-admin";
+
+loadEnvFiles();
 
 function offsetDate(days: number) {
   const today = getTodayDateOnly();
@@ -29,7 +32,7 @@ function offsetDate(days: number) {
 }
 
 async function createDemoUser(input: { email: string; fullName: string }) {
-  const admin = getSupabaseAdminClient();
+  const admin = getScriptSupabaseAdminClient();
 
   if (!admin) {
     throw new Error("Configura NEXT_PUBLIC_SUPABASE_URL y SUPABASE_SERVICE_ROLE_KEY para crear usuarios demo.");
@@ -59,7 +62,7 @@ async function createDemoUser(input: { email: string; fullName: string }) {
 }
 
 async function main() {
-  const db = requireDb();
+  const db = getScriptDb();
 
   const users = [
     { email: "ana.garcia@example.test", fullName: "Ana Garcia", role: "owner" as const },
@@ -137,7 +140,7 @@ async function main() {
       address: "Calle Industria 12",
       city: "Madrid",
       postalCode: "28021",
-      country: "Espana"
+      country: "España"
     })
     .returning();
 
@@ -302,7 +305,11 @@ async function main() {
   console.log(`Seed completado: ${company.name}, ${createdAssets.length} activos, ${createdObligations.length} obligaciones, ${memberCount.length} usuarios.`);
 }
 
-main().catch((error) => {
-  console.error(error);
-  process.exit(1);
-});
+main()
+  .catch((error) => {
+    console.error(error);
+    process.exitCode = 1;
+  })
+  .finally(async () => {
+    await closeScriptDb();
+  });

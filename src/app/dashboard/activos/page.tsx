@@ -1,5 +1,5 @@
 import { AssetForm } from "@/components/forms/asset-form";
-import { AssetsList } from "@/components/dashboard/assets-list";
+import { AssetsList } from "@/features/assets/components/assets-list";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getAssetsData, getFormOptionsData } from "@/modules/dashboard/data";

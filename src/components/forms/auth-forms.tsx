@@ -62,7 +62,7 @@ export function LoginForm() {
         <p className="text-xs text-critical">{form.formState.errors.email?.message}</p>
       </div>
       <div className="space-y-2">
-        <Label htmlFor="password">Contrasena</Label>
+        <Label htmlFor="password">Contraseña</Label>
         <Input id="password" type="password" {...form.register("password")} />
         <p className="text-xs text-critical">{form.formState.errors.password?.message}</p>
       </div>
@@ -110,7 +110,7 @@ export function RegisterForm() {
         <p className="text-xs text-critical">{form.formState.errors.email?.message}</p>
       </div>
       <div className="space-y-2">
-        <Label htmlFor="password">Contrasena</Label>
+        <Label htmlFor="password">Contraseña</Label>
         <Input id="password" type="password" {...form.register("password")} />
         <p className="text-xs text-critical">{form.formState.errors.password?.message}</p>
       </div>

@@ -11,5 +11,5 @@ export function AlertTitle({ className, ...props }: React.HTMLAttributes<HTMLHea
 }
 
 export function AlertDescription({ className, ...props }: React.HTMLAttributes<HTMLParagraphElement>) {
-  return <p className={cn("text-muted-foreground", className)} {...props} />;
+  return <p className={cn("break-words text-muted-foreground", className)} {...props} />;
 }

@@ -58,7 +58,17 @@ const config: Config = {
         sm: "calc(var(--radius) - 4px)"
       },
       boxShadow: {
-        soft: "0 12px 40px -24px rgb(15 23 42 / 0.45)"
+        soft: "0 12px 40px -24px rgb(15 23 42 / 0.45)",
+        control: "0 24px 70px -48px rgb(15 23 42 / 0.7)"
+      },
+      animation: {
+        "pulse-soft": "pulse-soft 2.8s ease-in-out infinite"
+      },
+      keyframes: {
+        "pulse-soft": {
+          "0%, 100%": { opacity: "0.72", transform: "scale(1)" },
+          "50%": { opacity: "1", transform: "scale(1.08)" }
+        }
       }
     }
   },

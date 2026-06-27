@@ -2,9 +2,10 @@ import { FileText } from "lucide-react";
 
 import { EmptyState } from "@/components/shared/empty-state";
 import { PageHeader } from "@/components/dashboard/page-header";
-import { DeleteDocumentButton } from "@/components/dashboard/delete-document-button";
-import { SecureDownloadButton } from "@/components/dashboard/secure-download-button";
+import { DeleteDocumentButton } from "@/features/documents/components/delete-document-button";
+import { SecureDownloadButton } from "@/features/documents/components/secure-download-button";
 import { DocumentUploadForm } from "@/components/forms/document-upload-form";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatDateEs, getObligationStatus } from "@/lib/date/obligations";
@@ -47,8 +48,43 @@ export default async function DocumentsPage() {
             <CardHeader>
               <CardTitle>Biblioteca</CardTitle>
             </CardHeader>
-            <CardContent>
-              <Table>
+            <CardContent className="space-y-4">
+              <div className="space-y-3 md:hidden">
+                {data.documents.map((document) => {
+                  const expiring =
+                    document.expirationDate && getObligationStatus({ dueDate: document.expirationDate }) !== "normal";
+                  return (
+                    <article className="rounded-lg border bg-background/70 p-4 shadow-sm" key={document.id}>
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-semibold">{document.fileName}</p>
+                          <p className="mt-1 text-xs text-muted-foreground">{Math.round(document.sizeBytes / 1024)} KB</p>
+                        </div>
+                        <Badge variant={expiring ? "warning" : "secondary"}>{document.documentType}</Badge>
+                      </div>
+                      <dl className="mt-4 grid gap-3 text-sm">
+                        <div>
+                          <dt className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">Relacionado</dt>
+                          <dd className="mt-1 font-medium">{document.assetName || "Sin activo"}</dd>
+                          <dd className="text-xs text-muted-foreground">{document.obligationTitle || "Sin obligacion"}</dd>
+                        </div>
+                        <div>
+                          <dt className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">Caducidad</dt>
+                          <dd className={expiring ? "mt-1 font-semibold text-critical" : "mt-1 font-medium"}>
+                            {document.expirationDate ? formatDateEs(document.expirationDate) : "Sin caducidad"}
+                          </dd>
+                        </div>
+                      </dl>
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        <SecureDownloadButton disabled={data.isDemo} documentId={document.id} />
+                        <DeleteDocumentButton companyId={companyId} disabled={data.isDemo} documentId={document.id} />
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+
+              <Table className="hidden md:table">
                 <TableHeader>
                   <TableRow>
                     <TableHead>Archivo</TableHead>

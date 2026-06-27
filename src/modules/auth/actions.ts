@@ -10,7 +10,7 @@ import type { ActionResult } from "@/types";
 
 const authSchema = z.object({
   email: z.string().trim().email("Introduce un email valido."),
-  password: z.string().min(8, "La contrasena debe tener al menos 8 caracteres.")
+  password: z.string().min(8, "La contraseña debe tener al menos 8 caracteres.")
 });
 
 const registerSchema = authSchema.extend({
@@ -41,7 +41,7 @@ export async function loginAction(input: LoginInput): Promise<ActionResult> {
   const { error } = await supabase.auth.signInWithPassword(parsed.data);
 
   if (error) {
-    return { ok: false, message: "No se pudo iniciar sesion. Revisa el email y la contrasena." };
+    return { ok: false, message: "No se pudo iniciar sesion. Revisa el email y la contraseña." };
   }
 
   return { ok: true, message: "Sesion iniciada." };

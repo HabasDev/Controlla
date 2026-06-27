@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Upload } from "lucide-react";
+import { FileCheck2, Upload } from "lucide-react";
 import { useRef, useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 
@@ -28,6 +28,7 @@ export function DocumentUploadForm({
   const formRef = useRef<HTMLFormElement>(null);
   const [message, setMessage] = useState<string | null>(disabled ? "Conecta Supabase Storage para subir documentos." : null);
   const [isOk, setIsOk] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const form = useForm<DocumentMetadataInput>({
     resolver: zodResolver(documentMetadataSchema),
@@ -57,6 +58,7 @@ export function DocumentUploadForm({
           if (result.ok) {
             formRef.current?.reset();
             form.reset();
+            setSelectedFile(null);
           }
         });
       })}
@@ -65,9 +67,23 @@ export function DocumentUploadForm({
         <FormResult message={message} ok={isOk} />
       </div>
       <input type="hidden" value={companyId} {...form.register("companyId")} />
-      <div className="space-y-2">
-        <Label htmlFor="document-file">Archivo</Label>
-        <Input accept=".pdf,.jpg,.jpeg,.png,.docx" disabled={disabled} id="document-file" name="file" required type="file" />
+      <div className="space-y-2 md:col-span-2">
+        <Label htmlFor="document-file">Archivo privado</Label>
+        <label className="flex min-h-36 cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed bg-background/70 p-6 text-center transition hover:border-primary/40 hover:bg-muted/40">
+          <Upload className="h-7 w-7 text-primary" aria-hidden="true" />
+          <span className="mt-3 text-sm font-semibold">{selectedFile ?? "Selecciona un PDF, JPG, PNG o DOCX"}</span>
+          <span className="mt-1 text-xs text-muted-foreground">Maximo 10 MB. La descarga se hara mediante URL firmada.</span>
+          <Input
+            accept=".pdf,.jpg,.jpeg,.png,.docx"
+            className="sr-only"
+            disabled={disabled}
+            id="document-file"
+            name="file"
+            onChange={(event) => setSelectedFile(event.target.files?.[0]?.name ?? null)}
+            required
+            type="file"
+          />
+        </label>
       </div>
       <div className="space-y-2">
         <Label htmlFor="document-type">Tipo</Label>
@@ -106,8 +122,8 @@ export function DocumentUploadForm({
       </div>
       <div className="md:col-span-2">
         <Button disabled={disabled || isPending} type="submit">
-          <Upload className="h-4 w-4" aria-hidden="true" />
-          Subir documento
+          <FileCheck2 className="h-4 w-4" aria-hidden="true" />
+          {isPending ? "Archivando..." : "Subir documento"}
         </Button>
       </div>
     </form>

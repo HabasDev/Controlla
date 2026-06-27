@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { CalendarClock, FileCheck2, History, ShieldCheck } from "lucide-react";
 
-import { ObligationActions } from "@/components/dashboard/obligation-actions";
+import { ObligationActions } from "@/features/obligations/components/obligation-actions";
 import { PageHeader } from "@/components/dashboard/page-header";
-import { StatusBadge } from "@/components/dashboard/status-badge";
+import { StatusBadge } from "@/components/shared/status-badge";
 import { DocumentUploadForm } from "@/components/forms/document-upload-form";
 import { ObligationForm } from "@/components/forms/obligation-form";
 import { Badge } from "@/components/ui/badge";
@@ -34,6 +35,24 @@ export default async function ObligationDetailPage({ params }: { params: Promise
   const companyId = resolveCompanyId(detail.options.company);
   const relatedDocuments = documentsData.documents.filter((document) => document.obligationTitle === detail.obligation.title);
   const reminderDays = [90, 30, 15, 7, 1, 0, -7];
+  const relativeDueDate = formatRelativeDueDate(detail.obligation);
+  const timeline = [
+    {
+      label: "Alta",
+      value: "Registrada",
+      icon: ShieldCheck
+    },
+    {
+      label: "Avisos",
+      value: reminderDays.slice(0, 4).map((days) => `${days}d`).join(" / "),
+      icon: CalendarClock
+    },
+    {
+      label: "Vencimiento",
+      value: relativeDueDate,
+      icon: FileCheck2
+    }
+  ];
 
   return (
     <>
@@ -43,11 +62,37 @@ export default async function ObligationDetailPage({ params }: { params: Promise
             Volver a obligaciones
           </Link>
         }
-        description={`${detail.obligation.typeName} · ${detail.obligation.assetName}`}
+        description={`${detail.obligation.typeName} - ${detail.obligation.assetName}`}
         title={detail.obligation.title}
       />
       <div className="grid gap-6 p-6 xl:grid-cols-[1fr_380px]">
         <div className="space-y-6">
+          <Card className="dark-control-surface overflow-hidden text-white">
+            <CardContent className="p-6">
+              <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-cyan-200">Expediente operativo</p>
+                  <h2 className="mt-3 text-2xl font-semibold tracking-tight">{relativeDueDate}</h2>
+                  <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-300">
+                    {detail.obligation.responsibleName} controla esta obligacion asociada a {detail.obligation.assetName}.
+                  </p>
+                </div>
+                <StatusBadge status={detail.obligation.computedStatus} />
+              </div>
+              <div className="mt-6 grid gap-3 md:grid-cols-3">
+                {timeline.map((item) => (
+                  <div className="rounded-lg border border-white/10 bg-white/[0.04] p-4" key={item.label}>
+                    <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">
+                      <item.icon className="h-4 w-4 text-cyan-200" aria-hidden />
+                      {item.label}
+                    </div>
+                    <p className="mt-3 text-sm font-semibold text-white">{item.value}</p>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
           <Card>
             <CardHeader>
               <div className="flex flex-wrap items-center justify-between gap-3">
@@ -59,7 +104,7 @@ export default async function ObligationDetailPage({ params }: { params: Promise
               <div>
                 <p className="text-muted-foreground">Fecha de vencimiento</p>
                 <p className="font-medium">{formatDateEs(detail.obligation.dueDate)}</p>
-                <p className="text-xs text-muted-foreground">{formatRelativeDueDate(detail.obligation)}</p>
+                <p className="text-xs text-muted-foreground">{relativeDueDate}</p>
               </div>
               <div>
                 <p className="text-muted-foreground">Responsable asignado</p>
@@ -173,7 +218,10 @@ export default async function ObligationDetailPage({ params }: { params: Promise
 
           <Card>
             <CardHeader>
-              <CardTitle>Historial</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <History className="h-4 w-4" aria-hidden />
+                Historial
+              </CardTitle>
             </CardHeader>
             <CardContent className="text-sm text-muted-foreground">
               Crear, editar, completar, cancelar y subir documentos queda registrado en `activity_logs`.

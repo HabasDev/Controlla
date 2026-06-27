@@ -1,4 +1,4 @@
-import { ObligationBoard } from "@/components/dashboard/obligation-board";
+import { ObligationBoard } from "@/features/obligations/components/obligation-board";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { ObligationForm } from "@/components/forms/obligation-form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

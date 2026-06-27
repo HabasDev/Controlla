@@ -174,7 +174,7 @@ export function formatRelativeDueDate(input: {
   }
 
   if (days === 1) {
-    return "Vence manana";
+    return "Vence mañana";
   }
 
   return `Vence en ${days} dias`;

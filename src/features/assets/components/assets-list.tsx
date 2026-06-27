@@ -72,7 +72,31 @@ export function AssetsList({ assets }: { assets: AssetListItem[] }) {
       {filtered.length === 0 ? (
         <EmptyState icon={Search} title="Sin activos" description="No hay activos que coincidan con los filtros." />
       ) : (
-        <Card>
+        <>
+        <div className="grid gap-3 md:hidden">
+          {filtered.map((asset) => (
+            <Link className="control-surface rounded-lg border p-4" href={`/dashboard/activos/${asset.id}`} key={asset.id}>
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="font-semibold">{asset.name}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">{asset.assetType} - {asset.locationName}</p>
+                </div>
+                <Badge variant={asset.status === "active" ? "success" : "outline"}>{asset.status === "active" ? "Al dia" : asset.status}</Badge>
+              </div>
+              <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
+                <div>
+                  <p className="text-xs text-muted-foreground">Responsable</p>
+                  <p className="font-medium">{asset.responsibleName}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Relacionados</p>
+                  <p className="font-medium">{asset.obligationsCount} obl. / {asset.documentsCount} docs</p>
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+        <Card className="hidden md:block">
           <CardContent className="pt-5">
             <Table>
               <TableHeader>
@@ -108,6 +132,7 @@ export function AssetsList({ assets }: { assets: AssetListItem[] }) {
             </Table>
           </CardContent>
         </Card>
+        </>
       )}
     </div>
   );

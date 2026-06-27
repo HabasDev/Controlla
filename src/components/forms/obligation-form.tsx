@@ -155,7 +155,7 @@ export function ObligationForm({
             <option value="days">Dias</option>
             <option value="weeks">Semanas</option>
             <option value="months">Meses</option>
-            <option value="years">Anos</option>
+            <option value="years">Años</option>
           </Select>
           <Input disabled={disabled} min={1} type="number" {...form.register("recurrenceInterval", { valueAsNumber: true })} />
         </div>

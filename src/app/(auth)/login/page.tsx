@@ -18,7 +18,7 @@ export default function LoginPage() {
         <LoginForm />
         <div className="flex justify-between text-sm text-muted-foreground">
           <Link className="hover:text-foreground" href="/forgot-password">
-            Recuperar contrasena
+            Recuperar contraseña
           </Link>
           <Link className="hover:text-foreground" href="/register">
             Crear cuenta

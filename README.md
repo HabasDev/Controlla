@@ -1,4 +1,4 @@
-# Controla
+﻿# Controla
 
 Controla es la base de un SaaS multiempresa para que pymes no olviden fechas criticas: ITV, seguros, extintores, revisiones, licencias, contratos, certificados, dominios, SSL, mantenimientos y documentacion asociada.
 
@@ -132,7 +132,7 @@ El seed crea datos demo reales usando Supabase Admin:
 - Documentos demo.
 - Notificacion demo.
 
-No incluye contrasenas reales. Las contrasenas de usuarios demo se generan aleatoriamente y no se almacenan.
+No incluye contraseñas reales. Las contraseñas de usuarios demo se generan aleatoriamente y no se almacenan.
 
 ```bash
 npm run db:seed
@@ -282,6 +282,6 @@ La auditoria tecnica y de producto para beta privada esta en `docs/IMPLEMENTATIO
 
 - Conectar Trigger.dev con despliegue real.
 - Completar portal de cliente de Stripe.
-- Anadir pantalla avanzada de reglas de recordatorio por obligacion.
+- Añadir pantalla avanzada de reglas de recordatorio por obligacion.
 - Ampliar auditoria y reportes.
-- Anadir pruebas de integracion con una base Supabase de test.
+- Añadir pruebas de integracion con una base Supabase de test.

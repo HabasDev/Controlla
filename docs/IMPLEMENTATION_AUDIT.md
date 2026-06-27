@@ -1,4 +1,4 @@
-# Implementation Audit
+﻿# Implementation Audit
 
 Fecha: 2026-06-25
 
@@ -18,7 +18,7 @@ Fecha: 2026-06-25
 - `npm run typecheck` fallaba si `.next/types` no existia antes de ejecutar TypeScript.
 - `npm run lint` fallaba por una referencia generada en `next-env.d.ts`.
 - El webhook de Stripe respondia `200` cuando Stripe no estaba configurado, ocultando una configuracion rota.
-- La validacion de documentos comprobaba MIME y tamano, pero no extension coherente ni longitud de nombre.
+- La validacion de documentos comprobaba MIME y tamaño, pero no extension coherente ni longitud de nombre.
 - Las acciones de equipo dependian demasiado del tipado TypeScript del cliente y no validaban el payload runtime con Zod.
 - Las acciones de equipo permitian intentar operar sobre el propietario; la base/RLS ayuda, pero la app necesitaba fallo explicito.
 - Borrar documentos no pedia confirmacion.
@@ -29,11 +29,11 @@ Fecha: 2026-06-25
 
 - `typecheck` ahora ejecuta `next typegen` antes de `tsc --noEmit`.
 - ESLint ignora `next-env.d.ts`, que es generado por Next.
-- Se anadio `engines` en `package.json` y `.nvmrc` con Node 20.
-- Se anadio CI en GitHub Actions con `npm ci`, typecheck, lint, test y build.
+- Se añadió `engines` en `package.json` y `.nvmrc` con Node 20.
+- Se añadió CI en GitHub Actions con `npm ci`, typecheck, lint, test y build.
 - Se endurecio `validateDocumentFile`:
   - MIME permitido;
-  - tamano maximo 10 MB;
+  - tamaño maximo 10 MB;
   - archivo no vacio;
   - nombre entre 1 y 180 caracteres;
   - extension coherente con MIME.
@@ -45,14 +45,14 @@ Fecha: 2026-06-25
 - La eliminacion de documentos pide confirmacion en el navegador.
 - El dashboard muestra vencidas, vence hoy, 7 dias, 30 dias y documentos, con accesos rapidos a obligacion, activo y documento.
 - Se mejoro `.env.example` con separacion de variables obligatorias, opcionales y server-only.
-- Se anadieron tests para validacion de documentos y roles de miembros.
+- Se añadieron tests para validacion de documentos y roles de miembros.
 
 ## Cambios descartados y por que
 
 - No se modificaron migraciones RLS ya aplicadas: son extensas y coherentes con el modelo actual; cambiarlas sin una base Supabase real puede ser mas arriesgado que beneficioso.
 - No se implementaron pagos reales: faltan claves, productos/precios de Stripe y decisiones comerciales finales.
 - No se implemento Trigger.dev real: las tareas existen, pero registrar jobs depende del runtime y entorno final.
-- No se anadio OCR, WhatsApp, ERP ni integraciones externas: requieren claves, alcance de producto y coste operativo.
+- No se añadió OCR, WhatsApp, ERP ni integraciones externas: requieren claves, alcance de producto y coste operativo.
 - No se hizo una reescritura de UI o arquitectura: el objetivo era elevar seguridad/calidad sin romper el stack.
 
 ## Limitaciones abiertas

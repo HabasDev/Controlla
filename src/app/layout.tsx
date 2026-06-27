@@ -4,8 +4,8 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "Controla",
-    template: "%s | Controla"
+    default: "Controlla",
+    template: "%s | Controlla"
   },
   description: "SaaS para gestionar caducidades, revisiones, mantenimientos y obligaciones criticas de empresas."
 };

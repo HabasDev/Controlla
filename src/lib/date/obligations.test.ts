@@ -39,7 +39,7 @@ describe("obligation date helpers", () => {
 
   it("formats relative copy in Spanish business language", () => {
     expect(formatRelativeDueDate({ dueDate: "2026-06-24", now })).toBe("Vence hoy");
-    expect(formatRelativeDueDate({ dueDate: "2026-06-25", now })).toBe("Vence manana");
+    expect(formatRelativeDueDate({ dueDate: "2026-06-25", now })).toBe("Vence mañana");
     expect(formatRelativeDueDate({ dueDate: "2026-06-20", now })).toBe("Vencida hace 4 dias");
   });
 });

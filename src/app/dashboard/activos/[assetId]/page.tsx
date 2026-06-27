@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { ObligationBoard } from "@/components/dashboard/obligation-board";
+import { ObligationBoard } from "@/features/obligations/components/obligation-board";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -35,7 +35,7 @@ export default async function AssetDetailPage({ params }: { params: Promise<{ as
             Volver a activos
           </Link>
         }
-        description={`${asset.assetType} · ${asset.locationName}`}
+        description={`${asset.assetType} - ${asset.locationName}`}
         title={asset.name}
       />
       <div className="grid gap-6 p-6 xl:grid-cols-[1fr_360px]">

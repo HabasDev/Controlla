@@ -5,7 +5,7 @@ import { CalendarDays, LayoutGrid, ListFilter, Table2 } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { EmptyState } from "@/components/shared/empty-state";
-import { StatusBadge } from "@/components/dashboard/status-badge";
+import { StatusBadge } from "@/components/shared/status-badge";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -104,7 +104,35 @@ export function ObligationBoard({ obligations, locations, members }: ObligationB
           {filtered.length === 0 ? (
             <EmptyState icon={ListFilter} title="Sin obligaciones para estos filtros" description="Ajusta los filtros o crea una nueva obligacion." />
           ) : (
-            <Card>
+            <>
+            <div className="grid gap-3 md:hidden">
+              {filtered.map((item) => (
+                <Link className="control-surface rounded-lg border p-4" href={`/dashboard/obligaciones/${item.id}`} key={item.id}>
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="font-semibold">{item.title}</p>
+                      <p className="mt-1 text-xs text-muted-foreground">{item.typeName} - {item.assetName}</p>
+                    </div>
+                    <StatusBadge status={item.computedStatus} />
+                  </div>
+                  <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
+                    <div>
+                      <p className="text-xs text-muted-foreground">Vencimiento</p>
+                      <p className="font-medium">{formatDateEs(item.dueDate)}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Estado temporal</p>
+                      <p className="font-medium">{formatRelativeDueDate(item)}</p>
+                    </div>
+                    <div className="col-span-2">
+                      <p className="text-xs text-muted-foreground">Responsable</p>
+                      <p className="font-medium">{item.responsibleName}</p>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+            <Card className="hidden md:block">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -138,6 +166,7 @@ export function ObligationBoard({ obligations, locations, members }: ObligationB
                 </TableBody>
               </Table>
             </Card>
+            </>
           )}
         </TabsContent>
 
