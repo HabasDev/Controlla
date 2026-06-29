@@ -9,21 +9,22 @@ export const metadata = {
 
 export default function LoginPage() {
   return (
-    <Card className="w-full max-w-md">
-      <CardHeader>
-        <CardTitle>Iniciar sesion</CardTitle>
-        <CardDescription>Accede al panel de tu empresa.</CardDescription>
+    <Card
+      className="w-full border-white/10 text-white shadow-2xl shadow-black/40 backdrop-blur-xl"
+      style={{ background: "linear-gradient(135deg, rgba(15, 23, 42, 0.88), rgba(8, 18, 35, 0.72))" }}
+    >
+      <CardHeader className="space-y-3 px-8 pt-9">
+        <CardTitle className="text-3xl">Iniciar sesion</CardTitle>
+        <CardDescription className="text-base text-slate-300">Accede a tu panel de empresa</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-6 px-8 pb-9">
         <LoginForm />
-        <div className="flex justify-between text-sm text-muted-foreground">
-          <Link className="hover:text-foreground" href="/forgot-password">
-            Recuperar contraseña
-          </Link>
-          <Link className="hover:text-foreground" href="/register">
+        <p className="text-center text-sm text-slate-400">
+          No tienes cuenta?{" "}
+          <Link className="font-medium text-teal-300 hover:text-teal-200" href="/register">
             Crear cuenta
           </Link>
-        </div>
+        </p>
       </CardContent>
     </Card>
   );

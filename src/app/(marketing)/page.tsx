@@ -1,219 +1,171 @@
 import Link from "next/link";
-import {
-  ArrowRight,
-  BadgeCheck,
-  BellRing,
-  CalendarClock,
-  FileCheck2,
-  Gauge,
-  LockKeyhole,
-  ShieldCheck
-} from "lucide-react";
+import { Bell, CalendarDays, Cloud, FileText, Gauge, HelpCircle, LockKeyhole, ShieldCheck, Zap } from "lucide-react";
 
-import { Badge } from "@/components/ui/badge";
-import { buttonVariants } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { cn } from "@/lib/utils/cn";
+import { LoginForm } from "@/components/forms/auth-forms";
 
-const controlItems = [
-  "ITV y seguros",
-  "Extintores",
-  "Mantenimientos",
-  "Licencias",
-  "Contratos",
-  "Certificados",
-  "Dominios",
-  "SSL"
+const featureList = [
+  {
+    icon: CalendarDays,
+    title: "Vencimientos",
+    description: "Nunca pierdas una fecha importante."
+  },
+  {
+    icon: ShieldCheck,
+    title: "Seguridad",
+    description: "Accesos seguros y controlados."
+  },
+  {
+    icon: FileText,
+    title: "Documentos",
+    description: "Todo centralizado, todo accesible."
+  }
 ];
 
-const benefits = [
-  { icon: CalendarClock, title: "Radar de vencimientos", text: "Prioriza vencido, hoy, 7 dias y 30 dias sin depender de hojas sueltas." },
-  { icon: BellRing, title: "Avisos operativos", text: "Recordatorios preparados para email y panel, con reglas por obligacion." },
-  { icon: FileCheck2, title: "Documentos privados", text: "Archivos asociados a activos u obligaciones con URLs firmadas." },
-  { icon: ShieldCheck, title: "Multiempresa seguro", text: "Separacion por empresa, roles y politicas RLS en base de datos." }
-];
-
-const steps = [
-  "Registra una obligacion critica",
-  "Asociala a un activo o sede",
-  "Adjunta documentacion",
-  "Revisa el radar antes del vencimiento"
+const controlCards = [
+  {
+    icon: Zap,
+    title: "Panel inteligente",
+    description: "Resumen claro de lo que importa, siempre actualizado.",
+    tone: "text-violet-300"
+  },
+  {
+    icon: Gauge,
+    title: "Control total",
+    description: "Toma decisiones con datos reales y en tiempo real.",
+    tone: "text-teal-300"
+  },
+  {
+    icon: Bell,
+    title: "Alertas criticas",
+    description: "Recibe avisos antes de que sea demasiado tarde.",
+    tone: "text-sky-300"
+  },
+  {
+    icon: Cloud,
+    title: "En la nube, seguro",
+    description: "Tu informacion protegida con tecnologia de vanguardia.",
+    tone: "text-fuchsia-300"
+  }
 ];
 
 export default function MarketingPage() {
   return (
-    <main className="overflow-x-hidden bg-slate-950 text-white">
-      <section className="relative overflow-hidden">
-        <div className="absolute inset-0 control-grid opacity-30" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(45,212,191,0.22),transparent_28rem),radial-gradient(circle_at_84%_18%,rgba(245,158,11,0.12),transparent_22rem),linear-gradient(180deg,rgba(2,6,23,0.2),#020617_88%)]" />
-        <div className="relative mx-auto flex min-h-[92vh] w-full max-w-7xl flex-col px-6 py-6">
-          <nav className="flex items-center justify-between gap-4">
-            <Link className="flex items-center gap-2 text-lg font-semibold" href="/">
-              <ShieldCheck className="h-6 w-6 text-cyan-200" aria-hidden="true" />
+    <main className="min-h-screen overflow-hidden bg-[#020814] text-white">
+      <section className="relative isolate min-h-screen px-6 py-6">
+        <div
+          className="absolute inset-0 -z-20 bg-cover bg-center bg-no-repeat"
+          style={{ backgroundImage: "url('/images/controla-night-road.png')" }}
+        />
+        <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_35%_18%,rgba(20,184,166,0.1),transparent_24rem),linear-gradient(90deg,rgba(2,8,20,0.6)_0%,rgba(2,8,20,0.32)_45%,rgba(2,8,20,0.82)_72%,rgba(2,8,20,0.95)_100%),linear-gradient(180deg,rgba(2,8,20,0.18)_0%,rgba(2,8,20,0.35)_58%,#020814_100%)]" />
+
+        <div className="mx-auto flex min-h-[calc(100vh-3rem)] w-full max-w-6xl flex-col">
+          <header className="flex items-center justify-between">
+            <Link className="flex items-center gap-2 text-xl font-semibold text-white" href="/">
+              <ShieldCheck className="h-7 w-7 text-teal-300" aria-hidden="true" />
               Controlla
             </Link>
-            <div className="flex items-center gap-2">
-              <Link className="hidden text-sm font-medium text-slate-200 hover:text-white sm:inline" href="/login">
-                Entrar
-              </Link>
-              <Link className={cn(buttonVariants({ size: "sm" }), "bg-white text-slate-950 hover:bg-cyan-50")} href="/register">
-                Contratar
-              </Link>
+            <div className="hidden items-center gap-2 text-xs text-slate-300 sm:flex">
+              <span>Modo oscuro</span>
+              <span className="h-2.5 w-2.5 rounded-full bg-teal-300 shadow-[0_0_14px_rgba(45,212,191,0.8)]" />
             </div>
-          </nav>
+          </header>
 
-          <div className="grid min-w-0 flex-1 items-center gap-10 py-16 lg:grid-cols-[minmax(0,1fr)_520px]">
-            <div className="min-w-0 max-w-3xl">
-              <Badge className="border-cyan-200/40 bg-cyan-200/10 text-cyan-50" variant="outline">
-                Centro de control para obligaciones criticas
-              </Badge>
-              <h1 className="mt-6 max-w-full break-words text-4xl font-semibold leading-tight tracking-tight sm:text-6xl">
-                Detecta lo que vence antes de que se convierta en un problema.
-              </h1>
-              <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-300">
-                Controlla organiza caducidades, activos y documentos para que una pyme sepa que requiere atencion, quien responde y que evidencia esta archivada.
+          <div className="grid flex-1 items-center gap-10 py-12 lg:grid-cols-[1fr_486px] lg:py-8">
+            <section className="relative min-w-0">
+              <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-teal-300">
+                <span className="h-1.5 w-1.5 rounded-full bg-teal-300" />
+                Plataforma inteligente
               </p>
-              <div className="mt-8 flex flex-wrap gap-3">
-                <Link className={cn(buttonVariants({ size: "lg" }), "bg-white text-slate-950 hover:bg-cyan-50")} href="/register">
-                  Contratar ahora
-                  <ArrowRight className="h-4 w-4" aria-hidden="true" />
-                </Link>
-                <Link className={cn(buttonVariants({ variant: "outline", size: "lg" }), "border-white/20 bg-white/[0.04] text-white hover:bg-white/[0.08] hover:text-white")} href="#como-funciona">
-                  Ver como funciona
-                </Link>
-              </div>
-            </div>
+              <h1 className="mt-5 max-w-xl text-5xl font-bold leading-[1.03] text-white md:text-6xl">
+                Tu empresa,
+                <span className="block">bajo <span className="text-teal-300">control.</span></span>
+              </h1>
+              <p className="mt-5 max-w-md text-base leading-7 text-slate-300">
+                Gestiona vencimientos, documentos y accesos de forma segura y centralizada.
+              </p>
 
-            <div className="dark-control-surface motion-enter min-w-0 rounded-2xl border p-5">
-              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-4">
-                <div className="min-w-0">
-                  <p className="text-sm font-semibold">Radar operativo</p>
-                  <p className="text-xs text-slate-400">Europe/Madrid - datos de empresa</p>
-                </div>
-                <Badge className="border-cyan-200/30 bg-cyan-200/10 text-cyan-50" variant="outline">Sistema listo</Badge>
-              </div>
-              <div className="mt-5 grid gap-3">
-                {[
-                  ["Vencido", "Seguro flota", "hace 3 dias", "critical"],
-                  ["Hoy", "Revision extintores", "vence hoy", "warning"],
-                  ["7 dias", "ITV furgoneta", "vence en 7 dias", "warning"],
-                  ["30 dias", "Certificado SSL", "vence en 29 dias", "success"]
-                ].map(([slot, title, detail, tone]) => (
-                  <div className="grid grid-cols-[minmax(0,72px)_minmax(0,1fr)_auto] items-center gap-3 rounded-lg border border-white/10 bg-white/[0.04] p-3" key={title}>
-                    <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">{slot}</span>
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium">{title}</p>
-                      <p className="text-xs text-slate-400">{detail}</p>
+              <div className="mt-8 space-y-5">
+                {featureList.map((feature) => (
+                  <div className="flex items-center gap-4" key={feature.title}>
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-teal-400/12 text-teal-300 shadow-[0_0_32px_rgba(20,184,166,0.18)]">
+                      <feature.icon className="h-6 w-6" aria-hidden="true" />
                     </div>
-                    <span
-                      className={cn(
-                        "h-2.5 w-2.5 rounded-full",
-                        tone === "critical" ? "bg-critical" : tone === "warning" ? "bg-warning" : "bg-success"
-                      )}
-                    />
+                    <div>
+                      <p className="font-semibold text-white">{feature.title}</p>
+                      <p className="mt-1 text-sm text-slate-400">{feature.description}</p>
+                    </div>
                   </div>
                 ))}
               </div>
-              <div className="mt-5 rounded-xl border border-white/10 bg-slate-950/40 p-4">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-slate-300">Salud operativa</span>
-                  <span className="font-semibold text-cyan-100">86%</span>
+
+              <div className="mt-12 hidden max-w-sm rounded-2xl border border-teal-300/15 bg-slate-950/24 p-4 text-sm text-slate-300 shadow-2xl shadow-black/20 backdrop-blur-sm lg:block">
+                <p className="font-medium text-teal-200">Ruta operativa iluminada</p>
+                <p className="mt-2 leading-6">
+                  Cada vencimiento, documento y responsable avanza hacia el mismo panel de control.
+                </p>
+              </div>
+            </section>
+
+            <section className="rounded-2xl border border-white/10 bg-slate-900/58 p-7 shadow-2xl shadow-black/40 backdrop-blur-xl lg:p-10">
+              <div className="mb-8 flex items-start justify-between">
+                <div>
+                  <h2 className="text-3xl font-semibold">Iniciar sesion</h2>
+                  <p className="mt-2 text-sm text-slate-300">Accede a tu panel de empresa</p>
                 </div>
-                <div className="mt-3 flex h-2 overflow-hidden rounded-full bg-white/10">
-                  <span className="w-[14%] bg-critical" />
-                  <span className="w-[22%] bg-warning" />
-                  <span className="flex-1 bg-success" />
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-teal-400/10 text-teal-300">
+                  <LockKeyhole className="h-5 w-5" aria-hidden="true" />
                 </div>
               </div>
-            </div>
+              <LoginForm />
+              <div className="mt-7 flex items-center gap-4 text-xs text-slate-500">
+                <span className="h-px flex-1 bg-white/10" />
+                <span>o continua con</span>
+                <span className="h-px flex-1 bg-white/10" />
+              </div>
+              <button
+                className="mt-5 flex h-12 w-full items-center justify-center gap-3 rounded-md border border-white/10 bg-white/[0.03] text-sm font-medium text-slate-400"
+                disabled
+                type="button"
+              >
+                Google no configurado
+              </button>
+            </section>
           </div>
-        </div>
-      </section>
 
-      <section className="bg-background text-foreground" id="como-funciona">
-        <div className="mx-auto grid max-w-7xl gap-8 px-6 py-20 lg:grid-cols-[0.9fr_1.1fr]">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-wide text-primary">El coste del olvido</p>
-            <h2 className="mt-3 text-3xl font-semibold tracking-tight">Excel, calendarios y notas no son un sistema de control.</h2>
-            <p className="mt-4 text-muted-foreground">
-              Una pyme necesita saber que vence, donde esta el documento, quien se ocupa y que pasa primero. Controlla convierte obligaciones dispersas en una cola operativa clara.
+          <section className="mb-8 rounded-2xl border border-white/10 bg-slate-900/48 px-6 py-8 shadow-2xl shadow-black/30 backdrop-blur-xl">
+            <p className="text-center text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+              Todo lo que necesitas, en un solo lugar
             </p>
-          </div>
-          <div className="grid gap-3 sm:grid-cols-2">
-            {controlItems.map((item) => (
-              <div className="control-surface flex items-center gap-3 rounded-lg border p-4" key={item}>
-                <Gauge className="h-5 w-5 text-primary" aria-hidden="true" />
-                <span className="font-medium">{item}</span>
+            <div className="mt-7 grid gap-6 md:grid-cols-4">
+              {controlCards.map((item) => (
+                <div className="text-center" key={item.title}>
+                  <div className={`mx-auto flex h-16 w-16 items-center justify-center rounded-xl bg-white/[0.06] ${item.tone}`}>
+                    <item.icon className="h-7 w-7" aria-hidden="true" />
+                  </div>
+                  <h3 className="mt-4 font-semibold text-white">{item.title}</h3>
+                  <p className="mx-auto mt-2 max-w-40 text-xs leading-5 text-slate-400">{item.description}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <footer className="flex flex-col gap-4 border-t border-white/10 py-6 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <div className="flex items-center gap-2 text-base font-semibold text-white">
+                <ShieldCheck className="h-5 w-5 text-teal-300" aria-hidden="true" />
+                Controlla
               </div>
-            ))}
-          </div>
+              <p className="mt-2">2026 Controlla. Todos los derechos reservados.</p>
+            </div>
+            <div className="flex items-center gap-7">
+              <Link className="hover:text-slate-300" href="/login">Privacidad</Link>
+              <Link className="hover:text-slate-300" href="/login">Terminos</Link>
+              <Link className="hover:text-slate-300" href="/login">Soporte</Link>
+              <HelpCircle className="h-4 w-4" aria-hidden="true" />
+            </div>
+          </footer>
         </div>
       </section>
-
-      <section className="border-y bg-card text-foreground">
-        <div className="mx-auto max-w-7xl px-6 py-20">
-          <div className="max-w-2xl">
-            <p className="text-sm font-semibold uppercase tracking-wide text-primary">Producto</p>
-            <h2 className="mt-3 text-3xl font-semibold tracking-tight">Control visual sin perder rigor operativo.</h2>
-          </div>
-          <div className="mt-8 grid gap-4 md:grid-cols-4">
-            {benefits.map((benefit) => (
-              <Card key={benefit.title}>
-                <CardHeader>
-                  <benefit.icon className="h-5 w-5 text-primary" aria-hidden="true" />
-                  <CardTitle>{benefit.title}</CardTitle>
-                </CardHeader>
-                <CardContent className="text-sm leading-6 text-muted-foreground">{benefit.text}</CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="bg-background text-foreground">
-        <div className="mx-auto grid max-w-7xl gap-8 px-6 py-20 lg:grid-cols-2">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-wide text-primary">Flujo</p>
-            <h2 className="mt-3 text-3xl font-semibold tracking-tight">Primer valor en minutos, no en semanas de implantacion.</h2>
-          </div>
-          <div className="space-y-3">
-            {steps.map((step, index) => (
-              <div className="control-surface flex items-center gap-4 rounded-lg border p-4" key={step}>
-                <span className="flex h-9 w-9 items-center justify-center rounded-md bg-primary text-sm font-semibold text-primary-foreground">
-                  {index + 1}
-                </span>
-                <span className="font-medium">{step}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="bg-slate-950 px-6 py-16">
-        <div className="dark-control-surface mx-auto max-w-5xl rounded-2xl border p-8 text-center">
-          <LockKeyhole className="mx-auto h-8 w-8 text-cyan-100" aria-hidden="true" />
-          <h2 className="mt-4 text-3xl font-semibold tracking-tight">Empieza con una beta privada de pago.</h2>
-          <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-slate-300">
-            Sin promesas falsas ni logos inventados: configura tu empresa, registra vencimientos reales y valida si Controlla encaja en tu operativa.
-          </p>
-          <div className="mt-6">
-            <Link className={cn(buttonVariants({ size: "lg" }), "bg-white text-slate-950 hover:bg-cyan-50")} href="/register">
-              Contratar acceso
-              <BadgeCheck className="h-4 w-4" aria-hidden="true" />
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      <footer className="border-t border-white/10 bg-slate-950 px-6 py-8 text-sm text-slate-400">
-        <div className="mx-auto flex max-w-7xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <p>Controlla. Control operativo de fechas criticas y documentacion empresarial.</p>
-          <div className="flex gap-4">
-            <Link className="hover:text-white" href="/login">Entrar</Link>
-            <Link className="hover:text-white" href="/register">Contratar</Link>
-          </div>
-        </div>
-      </footer>
     </main>
   );
 }
