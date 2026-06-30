@@ -11,7 +11,7 @@ import {
 
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils/cn";
-import { formatRelativeDueDate, getDaysUntilDueDate } from "@/lib/date/obligations";
+import { ExpirationRadar } from "@/components/dashboard/expiration-radar";
 import { getDashboardData } from "@/modules/dashboard/data";
 
 export const metadata = {
@@ -113,10 +113,6 @@ export default async function DashboardPage() {
   const health = Math.round((statusCounts.normal / total) * 100);
   const attentionCount = data.stats.expired + data.stats.dueToday + data.stats.dueIn7;
   const today = new Intl.DateTimeFormat("es-ES", { day: "2-digit", month: "long", year: "numeric", timeZone: data.company.timezone }).format(new Date());
-  const horizonItems = data.obligations
-    .slice()
-    .sort((a, b) => a.dueDate.localeCompare(b.dueDate))
-    .slice(0, 4);
   const activityItems = data.activity.slice(0, 4);
 
   return (
@@ -196,28 +192,7 @@ export default async function DashboardPage() {
       </div>
 
       <div className="mt-4 grid gap-4 lg:grid-cols-[1fr_0.95fr]">
-        <PanelCard className="p-5">
-          <h2 className="text-lg font-semibold text-white">Radar de vencimientos</h2>
-          <div className="mt-4 grid gap-4 md:grid-cols-[1fr_230px]">
-            <RadarGraphic />
-            <div className="space-y-3">
-              {horizonItems.map((item) => {
-                const days = getDaysUntilDueDate(item.dueDate, data.company.timezone);
-                const dot = days <= 0 ? "bg-red-500" : days <= 7 ? "bg-amber-400" : "bg-cyan-400";
-
-                return (
-                  <Link className="flex items-start gap-3 rounded-lg border border-white/5 bg-white/[0.025] p-3 transition hover:border-cyan-300/20 hover:bg-cyan-300/[0.045]" href={`/dashboard/obligaciones/${item.id}`} key={item.id}>
-                    <span className={cn("mt-1 h-2.5 w-2.5 shrink-0 rounded-full shadow-[0_0_12px_currentColor]", dot)} />
-                    <span className="min-w-0">
-                      <span className="block truncate text-sm font-medium text-slate-200">{item.title}</span>
-                      <span className="block text-xs text-slate-500">{formatRelativeDueDate(item)}</span>
-                    </span>
-                  </Link>
-                );
-              })}
-            </div>
-          </div>
-        </PanelCard>
+        <ExpirationRadar obligations={data.obligations} timezone={data.company.timezone} />
 
         <PanelCard className="p-5">
           <h2 className="text-lg font-semibold text-white">Actividad reciente</h2>

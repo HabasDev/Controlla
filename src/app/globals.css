@@ -113,6 +113,30 @@ select {
   animation: motion-enter 240ms var(--motion-ease) both;
 }
 
+@keyframes radar-sweep {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.motion-safe\:animate-radar-sweep {
+  animation: radar-sweep 7s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
 @keyframes motion-enter {
   from {
     opacity: 0;
