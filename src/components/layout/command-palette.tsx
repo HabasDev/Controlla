@@ -62,12 +62,12 @@ export function CommandPalette() {
 
   return (
     <>
-      <Button className="hidden min-w-48 justify-between text-muted-foreground lg:inline-flex" onClick={() => setOpen(true)} variant="outline">
+      <Button className="hidden min-w-64 justify-between border-cyan-200/10 bg-white/[0.03] text-slate-400 hover:bg-white/[0.06] hover:text-cyan-100 lg:inline-flex" onClick={() => setOpen(true)} variant="outline">
         <span className="flex items-center gap-2">
           <Search className="h-4 w-4" aria-hidden="true" />
           Buscar o saltar a...
         </span>
-        <span className="rounded border bg-muted px-1.5 py-0.5 text-[11px]">Ctrl K</span>
+        <span className="rounded border border-cyan-200/10 bg-slate-950/70 px-1.5 py-0.5 text-[11px] text-slate-500">Ctrl K</span>
       </Button>
       <Button aria-label="Abrir comandos" className="lg:hidden" onClick={() => setOpen(true)} size="icon" variant="outline">
         <Search className="h-4 w-4" aria-hidden="true" />

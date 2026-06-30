@@ -38,14 +38,14 @@ export function AppNavigation({ compact = false, limit }: { compact?: boolean; l
             className={cn(
               compact
                 ? "flex flex-col items-center justify-center gap-1 rounded-lg px-2 py-2 text-[11px] font-semibold"
-                : cn("flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-semibold", active && "signal-line"),
+                : "flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-semibold transition",
               active
                 ? compact
                   ? "bg-slate-900 text-white shadow-lg"
-                  : "bg-white/[0.08] pl-4 text-white shadow-sm"
+                  : "border-l-2 border-cyan-300 bg-cyan-300/10 pl-3 text-white shadow-[0_0_28px_rgba(34,211,238,0.10)]"
                 : compact
                   ? "text-muted-foreground hover:bg-muted hover:text-foreground"
-                  : "text-slate-400 hover:bg-white/[0.06] hover:text-white"
+                  : "text-slate-400 hover:bg-white/[0.045] hover:text-white"
             )}
             href={item.href}
             key={item.href}
