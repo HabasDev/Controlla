@@ -114,16 +114,54 @@ select {
 }
 
 @keyframes radar-sweep {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
+  to {
     transform: rotate(360deg);
   }
 }
 
 .motion-safe\:animate-radar-sweep {
   animation: radar-sweep 7s linear infinite;
+}
+
+.radar-sweep {
+  animation: radar-sweep 8.5s linear infinite;
+  transform-box: fill-box;
+}
+
+@keyframes radar-center-pulse {
+  0%,
+  100% {
+    opacity: 0.08;
+    transform: scale(0.92);
+  }
+  50% {
+    opacity: 0.2;
+    transform: scale(1.2);
+  }
+}
+
+.radar-center-pulse {
+  animation: radar-center-pulse 2.8s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+@keyframes radar-critical-pulse {
+  0%,
+  100% {
+    opacity: 0.08;
+    transform: scale(0.92);
+  }
+  50% {
+    opacity: 0.22;
+    transform: scale(1.25);
+  }
+}
+
+.radar-critical-pulse {
+  animation: radar-critical-pulse 2.2s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -134,6 +172,12 @@ select {
     animation-iteration-count: 1 !important;
     scroll-behavior: auto !important;
     transition-duration: 0.001ms !important;
+  }
+
+  .radar-sweep,
+  .radar-center-pulse,
+  .radar-critical-pulse {
+    animation: none !important;
   }
 }
 

@@ -5,6 +5,9 @@ export const appEnv = {
   get databaseUrl() {
     return process.env.DATABASE_URL;
   },
+  get demoMode() {
+    return process.env.CONTROLLA_DEMO_MODE ?? "auto";
+  },
   get supabaseUrl() {
     return process.env.NEXT_PUBLIC_SUPABASE_URL;
   },
@@ -42,6 +45,10 @@ export function hasSupabaseConfig() {
   return Boolean(appEnv.supabaseUrl && appEnv.supabaseAnonKey);
 }
 
+export function allowsDemoMode() {
+  return appEnv.demoMode !== "disabled";
+}
+
 export function getMissingRuntimeWarnings() {
   const warnings: string[] = [];
 
@@ -50,7 +57,11 @@ export function getMissingRuntimeWarnings() {
   }
 
   if (!hasDatabaseConfig()) {
-    warnings.push("DATABASE_URL no esta configurado. El panel muestra datos demo locales.");
+    warnings.push(
+      allowsDemoMode()
+        ? "DATABASE_URL no esta configurado. El panel usa modo demo local escribible."
+        : "DATABASE_URL no esta configurado y el modo demo esta desactivado."
+    );
   }
 
   if (!appEnv.resendApiKey) {

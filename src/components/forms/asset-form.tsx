@@ -13,15 +13,19 @@ import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { assetSchema, type AssetInput } from "@/lib/validations/asset";
-import { createAssetAction } from "@/modules/assets/actions";
+import { createAssetAction, updateAssetAction } from "@/modules/assets/actions";
 
 export function AssetForm({
   companyId,
+  assetId,
+  initialValues,
   locations,
   members,
   disabled
 }: {
   companyId: string;
+  assetId?: string;
+  initialValues?: Partial<AssetInput>;
   locations: { id: string; name: string }[];
   members: { userId: string; fullName: string }[];
   disabled?: boolean;
@@ -34,14 +38,14 @@ export function AssetForm({
     resolver: zodResolver(assetSchema),
     defaultValues: {
       companyId,
-      name: "",
-      assetType: "Vehiculo",
-      status: "active",
-      locationId: "",
-      responsibleUserId: "",
-      internalReference: "",
-      serialNumber: "",
-      description: ""
+      name: initialValues?.name ?? "",
+      assetType: initialValues?.assetType ?? "Vehiculo",
+      status: initialValues?.status ?? "active",
+      locationId: initialValues?.locationId ?? "",
+      responsibleUserId: initialValues?.responsibleUserId ?? "",
+      internalReference: initialValues?.internalReference ?? "",
+      serialNumber: initialValues?.serialNumber ?? "",
+      description: initialValues?.description ?? ""
     }
   });
 
@@ -53,11 +57,16 @@ export function AssetForm({
           if (disabled) {
             return;
           }
-          const result = await createAssetAction(values);
+          const result = assetId ? await updateAssetAction(companyId, assetId, values) : await createAssetAction(values);
           setMessage(result.message ?? null);
           setIsOk(result.ok);
           if (result.ok) {
-            form.reset();
+            if (!assetId) {
+              form.reset();
+              if (result.data?.assetId) {
+                router.push(`/dashboard/activos/${result.data.assetId}`);
+              }
+            }
             router.refresh();
           }
         })
@@ -83,6 +92,14 @@ export function AssetForm({
           <option>Certificado SSL</option>
           <option>Local</option>
           <option>Otro</option>
+        </Select>
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="asset-status">Estado</Label>
+        <Select id="asset-status" disabled={disabled} {...form.register("status")}>
+          <option value="active">Activo</option>
+          <option value="inactive">Inactivo</option>
+          <option value="retired">Retirado</option>
         </Select>
       </div>
       <div className="space-y-2">
@@ -122,7 +139,7 @@ export function AssetForm({
       <div className="md:col-span-2">
         <Button disabled={disabled || isPending} type="submit">
           <Plus className="h-4 w-4" aria-hidden="true" />
-          Crear activo
+          {assetId ? "Guardar cambios" : "Crear activo"}
         </Button>
       </div>
     </form>

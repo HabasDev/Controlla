@@ -33,7 +33,9 @@ export default async function ObligationDetailPage({ params }: { params: Promise
   }
 
   const companyId = resolveCompanyId(detail.options.company);
-  const relatedDocuments = documentsData.documents.filter((document) => document.obligationTitle === detail.obligation.title);
+  const formsDisabled = detail.isDemo && !detail.isDemoWritable;
+  const documentUploadDisabled = documentsData.isDemo;
+  const relatedDocuments = documentsData.documents.filter((document) => document.obligationId === detail.obligation.id);
   const reminderDays = [90, 30, 15, 7, 1, 0, -7];
   const relativeDueDate = formatRelativeDueDate(detail.obligation);
   const timeline = [
@@ -137,7 +139,7 @@ export default async function ObligationDetailPage({ params }: { params: Promise
               <ObligationForm
                 assets={detail.options.assets}
                 companyId={companyId}
-                disabled={detail.isDemo}
+                disabled={formsDisabled}
                 initialValues={{
                   companyId,
                   title: detail.obligation.title,
@@ -172,7 +174,7 @@ export default async function ObligationDetailPage({ params }: { params: Promise
             <CardContent>
               <ObligationActions
                 companyId={companyId}
-                disabled={detail.isDemo}
+                disabled={formsDisabled}
                 obligationId={detail.obligation.id}
                 recurrenceEnabled={detail.obligation.recurrenceEnabled}
               />
@@ -210,7 +212,7 @@ export default async function ObligationDetailPage({ params }: { params: Promise
               <DocumentUploadForm
                 assets={detail.options.assets}
                 companyId={companyId}
-                disabled={detail.isDemo}
+                disabled={documentUploadDisabled}
                 obligations={obligationsData.obligations.map((item) => ({ id: item.id, title: item.title }))}
               />
             </CardContent>

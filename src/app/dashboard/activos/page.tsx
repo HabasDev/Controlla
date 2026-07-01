@@ -15,6 +15,7 @@ function resolveCompanyId(company: { id?: string; companyId?: string }) {
 export default async function AssetsPage() {
   const [data, options] = await Promise.all([getAssetsData(), getFormOptionsData()]);
   const companyId = resolveCompanyId(data.company);
+  const formsDisabled = data.isDemo && !data.isDemoWritable;
 
   return (
     <>
@@ -25,7 +26,7 @@ export default async function AssetsPage() {
             <CardTitle>Crear activo</CardTitle>
           </CardHeader>
           <CardContent>
-            <AssetForm companyId={companyId} disabled={data.isDemo} locations={options.locations} members={options.members} />
+            <AssetForm companyId={companyId} disabled={formsDisabled} locations={options.locations} members={options.members} />
           </CardContent>
         </Card>
         <AssetsList assets={data.assets} />

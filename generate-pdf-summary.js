@@ -42,7 +42,7 @@ const pdfLines = [
   'BT',
   '/F1 12 Tf',
   '50 740 Td',
-  ...lines.flatMap((line, index) => {
+  ...lines.flatMap((line) => {
     const escaped = escapePdfText(line);
     return [`(${escaped}) Tj`, '0 -18 Td'];
   }).slice(0, -1),

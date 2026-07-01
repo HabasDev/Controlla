@@ -30,10 +30,11 @@ export function ObligationBoard({ obligations, locations, members }: ObligationB
 
   const filtered = useMemo(() => {
     return obligations.filter((item) => {
+      const normalizedSearch = search.toLowerCase();
       const matchesSearch =
-        item.title.toLowerCase().includes(search.toLowerCase()) ||
-        item.typeName.toLowerCase().includes(search.toLowerCase()) ||
-        item.assetName.toLowerCase().includes(search.toLowerCase());
+        item.title.toLowerCase().includes(normalizedSearch) ||
+        item.typeName.toLowerCase().includes(normalizedSearch) ||
+        item.assetName.toLowerCase().includes(normalizedSearch);
       const matchesStatus = status === "all" || item.computedStatus === status;
       const matchesLocation = location === "all" || item.locationName === location;
       const matchesResponsible = responsible === "all" || item.responsibleName === responsible;
@@ -41,6 +42,10 @@ export function ObligationBoard({ obligations, locations, members }: ObligationB
       return matchesSearch && matchesStatus && matchesLocation && matchesResponsible;
     });
   }, [location, obligations, responsible, search, status]);
+
+  const emptyFilters = (
+    <EmptyState icon={ListFilter} title="Sin obligaciones para estos filtros" description="Ajusta los filtros o crea una nueva obligacion." />
+  );
 
   return (
     <div className="space-y-4">
@@ -58,6 +63,7 @@ export function ObligationBoard({ obligations, locations, members }: ObligationB
             <option value="warning">Proximo a vencer</option>
             <option value="normal">Correcto</option>
             <option value="completed">Completado</option>
+            <option value="cancelled">Cancelado</option>
           </Select>
         </div>
         <div className="space-y-2">
@@ -102,115 +108,137 @@ export function ObligationBoard({ obligations, locations, members }: ObligationB
 
         <TabsContent value="table">
           {filtered.length === 0 ? (
-            <EmptyState icon={ListFilter} title="Sin obligaciones para estos filtros" description="Ajusta los filtros o crea una nueva obligacion." />
+            emptyFilters
           ) : (
             <>
-            <div className="grid gap-3 md:hidden">
-              {filtered.map((item) => (
-                <Link className="control-surface rounded-lg border p-4" href={`/dashboard/obligaciones/${item.id}`} key={item.id}>
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <p className="font-semibold">{item.title}</p>
-                      <p className="mt-1 text-xs text-muted-foreground">{item.typeName} - {item.assetName}</p>
+              <div className="grid gap-3 md:hidden">
+                {filtered.map((item) => (
+                  <Link className="control-surface rounded-lg border p-4" href={`/dashboard/obligaciones/${item.id}`} key={item.id}>
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="font-semibold">{item.title}</p>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          {item.typeName} - {item.assetName}
+                        </p>
+                      </div>
+                      <StatusBadge status={item.computedStatus} />
                     </div>
-                    <StatusBadge status={item.computedStatus} />
-                  </div>
-                  <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
-                    <div>
-                      <p className="text-xs text-muted-foreground">Vencimiento</p>
-                      <p className="font-medium">{formatDateEs(item.dueDate)}</p>
+                    <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
+                      <div>
+                        <p className="text-xs text-muted-foreground">Vencimiento</p>
+                        <p className="font-medium">{formatDateEs(item.dueDate)}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Estado temporal</p>
+                        <p className="font-medium">{formatRelativeDueDate(item)}</p>
+                      </div>
+                      <div className="col-span-2">
+                        <p className="text-xs text-muted-foreground">Responsable</p>
+                        <p className="font-medium">{item.responsibleName}</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground">Estado temporal</p>
-                      <p className="font-medium">{formatRelativeDueDate(item)}</p>
-                    </div>
-                    <div className="col-span-2">
-                      <p className="text-xs text-muted-foreground">Responsable</p>
-                      <p className="font-medium">{item.responsibleName}</p>
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-            <Card className="hidden md:block">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Obligacion</TableHead>
-                    <TableHead>Activo</TableHead>
-                    <TableHead>Vencimiento</TableHead>
-                    <TableHead>Responsable</TableHead>
-                    <TableHead>Estado</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filtered.map((item) => (
-                    <TableRow key={item.id}>
-                      <TableCell>
-                        <Link className="font-medium text-primary hover:underline" href={`/dashboard/obligaciones/${item.id}`}>
-                          {item.title}
-                        </Link>
-                        <p className="text-xs text-muted-foreground">{item.typeName}</p>
-                      </TableCell>
-                      <TableCell>{item.assetName}</TableCell>
-                      <TableCell>
-                        <span className="font-medium">{formatDateEs(item.dueDate)}</span>
-                        <p className="text-xs text-muted-foreground">{formatRelativeDueDate(item)}</p>
-                      </TableCell>
-                      <TableCell>{item.responsibleName}</TableCell>
-                      <TableCell>
-                        <StatusBadge status={item.computedStatus} />
-                      </TableCell>
+                  </Link>
+                ))}
+              </div>
+              <Card className="hidden md:block">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Obligacion</TableHead>
+                      <TableHead>Activo</TableHead>
+                      <TableHead>Vencimiento</TableHead>
+                      <TableHead>Responsable</TableHead>
+                      <TableHead>Estado</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </Card>
+                  </TableHeader>
+                  <TableBody>
+                    {filtered.map((item) => (
+                      <TableRow key={item.id}>
+                        <TableCell>
+                          <Link className="font-medium text-primary hover:underline" href={`/dashboard/obligaciones/${item.id}`}>
+                            {item.title}
+                          </Link>
+                          <p className="text-xs text-muted-foreground">{item.typeName}</p>
+                        </TableCell>
+                        <TableCell>{item.assetName}</TableCell>
+                        <TableCell>
+                          <span className="font-medium">{formatDateEs(item.dueDate)}</span>
+                          <p className="text-xs text-muted-foreground">{formatRelativeDueDate(item)}</p>
+                        </TableCell>
+                        <TableCell>{item.responsibleName}</TableCell>
+                        <TableCell>
+                          <StatusBadge status={item.computedStatus} />
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </Card>
             </>
           )}
         </TabsContent>
 
         <TabsContent value="cards">
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {filtered.map((item) => (
-              <Card key={item.id}>
-                <CardHeader>
-                  <div className="flex items-start justify-between gap-3">
-                    <CardTitle className="leading-snug">{item.title}</CardTitle>
-                    <StatusBadge status={item.computedStatus} />
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-3 text-sm">
-                  <div>
-                    <p className="text-muted-foreground">Vencimiento</p>
-                    <p className="font-medium">{formatDateEs(item.dueDate)} · {formatRelativeDueDate(item)}</p>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    <Badge variant="secondary">{item.typeName}</Badge>
-                    <Badge variant="outline">{item.assetName}</Badge>
-                    <Badge variant="outline">{item.responsibleName}</Badge>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          {filtered.length === 0 ? (
+            emptyFilters
+          ) : (
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+              {filtered.map((item) => (
+                <Link
+                  className="block rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  href={`/dashboard/obligaciones/${item.id}`}
+                  key={item.id}
+                >
+                  <Card className="h-full transition hover:border-primary/40 hover:shadow-sm">
+                    <CardHeader>
+                      <div className="flex items-start justify-between gap-3">
+                        <CardTitle className="leading-snug">{item.title}</CardTitle>
+                        <StatusBadge status={item.computedStatus} />
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-3 text-sm">
+                      <div>
+                        <p className="text-muted-foreground">Vencimiento</p>
+                        <p className="font-medium">
+                          {formatDateEs(item.dueDate)} - {formatRelativeDueDate(item)}
+                        </p>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        <Badge variant="secondary">{item.typeName}</Badge>
+                        <Badge variant="outline">{item.assetName}</Badge>
+                        <Badge variant="outline">{item.responsibleName}</Badge>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))}
+            </div>
+          )}
         </TabsContent>
 
         <TabsContent value="calendar">
-          <Card>
-            <CardContent className="grid gap-3 pt-5 md:grid-cols-2 xl:grid-cols-3">
-              {filtered
-                .slice()
-                .sort((a, b) => a.dueDate.localeCompare(b.dueDate))
-                .map((item) => (
-                  <div className="rounded-md border p-3" key={item.id}>
-                    <p className="text-sm font-semibold">{formatDateEs(item.dueDate)}</p>
-                    <p className="mt-1 text-sm">{item.title}</p>
-                    <p className="text-xs text-muted-foreground">{item.responsibleName}</p>
-                  </div>
-                ))}
-            </CardContent>
-          </Card>
+          {filtered.length === 0 ? (
+            <EmptyState icon={CalendarDays} title="Sin fechas para estos filtros" description="Ajusta los filtros para ver el calendario operativo." />
+          ) : (
+            <Card>
+              <CardContent className="grid gap-3 pt-5 md:grid-cols-2 xl:grid-cols-3">
+                {filtered
+                  .slice()
+                  .sort((a, b) => a.dueDate.localeCompare(b.dueDate))
+                  .map((item) => (
+                    <Link
+                      className="rounded-md border p-3 transition hover:border-primary/40 hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                      href={`/dashboard/obligaciones/${item.id}`}
+                      key={item.id}
+                    >
+                      <p className="text-sm font-semibold">{formatDateEs(item.dueDate)}</p>
+                      <p className="mt-1 text-sm">{item.title}</p>
+                      <p className="text-xs text-muted-foreground">{item.responsibleName}</p>
+                    </Link>
+                  ))}
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
       </Tabs>
     </div>

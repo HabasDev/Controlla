@@ -1,13 +1,16 @@
 "use server";
 
 import { and, eq } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
 
-import { requireDb } from "@/db";
+import { getDb, requireDb } from "@/db";
 import { assets, companyMembers, locations } from "@/db/schema";
 import { requirePermission } from "@/lib/auth/session";
+import { allowsDemoMode } from "@/lib/env";
 import { assetSchema, type AssetInput } from "@/lib/validations/asset";
 import { zodFieldErrors } from "@/lib/validations/shared";
 import { createActivityLog } from "@/modules/audit-log/service";
+import { createDemoAsset, isDemoCompanyId, updateDemoAsset } from "@/modules/demo/store";
 import type { ActionResult } from "@/types";
 
 function nullableId(value: string | undefined) {
@@ -19,6 +22,13 @@ export async function createAssetAction(input: AssetInput): Promise<ActionResult
 
   if (!parsed.success) {
     return { ok: false, message: "Revisa los datos del activo.", fieldErrors: zodFieldErrors(parsed.error) };
+  }
+
+  if ((!getDb() || isDemoCompanyId(parsed.data.companyId)) && allowsDemoMode()) {
+    const asset = await createDemoAsset(parsed.data);
+    revalidatePath("/dashboard");
+    revalidatePath("/dashboard/activos");
+    return { ok: true, data: { assetId: asset.id }, message: "Activo creado en modo demo." };
   }
 
   const { user } = await requirePermission(parsed.data.companyId, "assets:manage");
@@ -74,5 +84,103 @@ export async function createAssetAction(input: AssetInput): Promise<ActionResult
     metadata: { name: parsed.data.name }
   });
 
+  revalidatePath("/dashboard");
+  revalidatePath("/dashboard/activos");
+
   return { ok: true, data: { assetId: asset.id }, message: "Activo creado." };
+}
+
+export async function updateAssetAction(
+  companyId: string,
+  assetId: string,
+  input: AssetInput
+): Promise<ActionResult<{ assetId: string }>> {
+  const parsed = assetSchema.safeParse(input);
+
+  if (!parsed.success) {
+    return { ok: false, message: "Revisa los datos del activo.", fieldErrors: zodFieldErrors(parsed.error) };
+  }
+
+  if (parsed.data.companyId !== companyId) {
+    return { ok: false, message: "El activo no pertenece a la empresa activa." };
+  }
+
+  if ((!getDb() || isDemoCompanyId(companyId)) && allowsDemoMode()) {
+    const asset = await updateDemoAsset(assetId, parsed.data);
+
+    if (!asset) {
+      return { ok: false, message: "No se encontro el activo." };
+    }
+
+    revalidatePath("/dashboard");
+    revalidatePath("/dashboard/activos");
+    revalidatePath(`/dashboard/activos/${assetId}`);
+    return { ok: true, data: { assetId }, message: "Activo actualizado en modo demo." };
+  }
+
+  const { user } = await requirePermission(companyId, "assets:manage");
+  const db = requireDb();
+  const asset = await db.query.assets.findFirst({
+    where: and(eq(assets.id, assetId), eq(assets.companyId, companyId))
+  });
+
+  if (!asset) {
+    return { ok: false, message: "No se encontro el activo." };
+  }
+
+  const locationId = nullableId(parsed.data.locationId);
+  const responsibleUserId = nullableId(parsed.data.responsibleUserId);
+
+  if (locationId) {
+    const location = await db.query.locations.findFirst({
+      where: and(eq(locations.id, locationId), eq(locations.companyId, companyId))
+    });
+
+    if (!location) {
+      return { ok: false, message: "La sede indicada no pertenece a esta empresa." };
+    }
+  }
+
+  if (responsibleUserId) {
+    const membership = await db.query.companyMembers.findFirst({
+      where: and(
+        eq(companyMembers.companyId, companyId),
+        eq(companyMembers.userId, responsibleUserId),
+        eq(companyMembers.status, "active")
+      )
+    });
+
+    if (!membership) {
+      return { ok: false, message: "El responsable debe ser miembro activo de la empresa." };
+    }
+  }
+
+  await db
+    .update(assets)
+    .set({
+      locationId,
+      name: parsed.data.name,
+      assetType: parsed.data.assetType,
+      internalReference: parsed.data.internalReference,
+      serialNumber: parsed.data.serialNumber,
+      description: parsed.data.description,
+      status: parsed.data.status,
+      responsibleUserId
+    })
+    .where(and(eq(assets.id, assetId), eq(assets.companyId, companyId)));
+
+  await createActivityLog({
+    companyId,
+    actorUserId: user.id,
+    entityType: "asset",
+    entityId: assetId,
+    action: "asset.updated",
+    metadata: { name: parsed.data.name }
+  });
+
+  revalidatePath("/dashboard");
+  revalidatePath("/dashboard/activos");
+  revalidatePath(`/dashboard/activos/${assetId}`);
+
+  return { ok: true, data: { assetId }, message: "Activo actualizado." };
 }

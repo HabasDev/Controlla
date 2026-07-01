@@ -15,6 +15,7 @@ function resolveCompanyId(company: { id?: string; companyId?: string }) {
 export default async function ObligationsPage() {
   const [data, options] = await Promise.all([getObligationsData(), getFormOptionsData()]);
   const companyId = resolveCompanyId(data.company);
+  const formsDisabled = data.isDemo && !data.isDemoWritable;
 
   return (
     <>
@@ -28,7 +29,7 @@ export default async function ObligationsPage() {
             <ObligationForm
               assets={options.assets}
               companyId={companyId}
-              disabled={data.isDemo}
+              disabled={formsDisabled}
               locations={options.locations}
               members={options.members}
               obligationTypes={options.obligationTypes}

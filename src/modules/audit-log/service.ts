@@ -5,6 +5,8 @@ export type ActivityAction =
   | "obligation.created"
   | "obligation.updated"
   | "obligation.completed"
+  | "obligation.reviewed"
+  | "obligation.resolved"
   | "obligation.cancelled"
   | "document.uploaded"
   | "document.deleted"

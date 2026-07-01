@@ -125,13 +125,12 @@ export default async function DashboardPage() {
           <h1 className="mt-2 text-4xl font-semibold tracking-tight text-white">Panel de control</h1>
           <p className="mt-2 text-sm text-slate-400">Resumen operativo de obligaciones, activos, alertas y actividad reciente.</p>
         </div>
-        <button className="inline-flex h-10 items-center justify-between gap-3 rounded-md border border-cyan-200/10 bg-slate-950/52 px-4 text-sm text-slate-300 backdrop-blur lg:min-w-72" type="button">
+        <div className="inline-flex h-10 items-center justify-between gap-3 rounded-md border border-cyan-200/10 bg-slate-950/52 px-4 text-sm text-slate-300 backdrop-blur lg:min-w-72">
           <span className="flex items-center gap-2">
             <CalendarDays className="h-4 w-4 text-slate-500" aria-hidden="true" />
-            {today}
+            <time dateTime={new Date().toISOString()}>{today}</time>
           </span>
-          <span className="text-slate-600">⌄</span>
-        </button>
+        </div>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[1.65fr_0.85fr]">
@@ -197,16 +196,20 @@ export default async function DashboardPage() {
         <PanelCard className="p-5">
           <h2 className="text-lg font-semibold text-white">Actividad reciente</h2>
           <div className="mt-4 divide-y divide-white/8">
-            {activityItems.map((activity, index) => (
-              <div className="flex items-center gap-3 py-3" key={activity.id}>
-                <span className={cn("h-2.5 w-2.5 rounded-full", index % 3 === 0 ? "bg-red-500" : index % 3 === 1 ? "bg-green-400" : "bg-cyan-400")} />
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm text-slate-300">{activity.label}</p>
-                  <p className="truncate text-xs text-slate-500">{activity.detail}</p>
+            {activityItems.length === 0 ? (
+              <p className="py-6 text-sm text-slate-500">Todavia no hay actividad registrada.</p>
+            ) : (
+              activityItems.map((activity, index) => (
+                <div className="flex items-center gap-3 py-3" key={activity.id}>
+                  <span className={cn("h-2.5 w-2.5 rounded-full", index % 3 === 0 ? "bg-red-500" : index % 3 === 1 ? "bg-green-400" : "bg-cyan-400")} />
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm text-slate-300">{activity.label}</p>
+                    <p className="truncate text-xs text-slate-500">{activity.detail}</p>
+                  </div>
+                  <span className="text-xs text-slate-600">{new Date(activity.createdAt).toLocaleDateString("es-ES")}</span>
                 </div>
-                <span className="text-xs text-slate-600">{new Date(activity.createdAt).toLocaleDateString("es-ES")}</span>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </PanelCard>
       </div>

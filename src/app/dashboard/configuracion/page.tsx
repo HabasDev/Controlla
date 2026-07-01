@@ -1,4 +1,7 @@
+import { Building2 } from "lucide-react";
+
 import { CompanyForm } from "@/components/forms/company-form";
+import { EmptyState } from "@/components/shared/empty-state";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -41,24 +44,28 @@ export default async function SettingsPage() {
             <CardTitle>Sedes</CardTitle>
           </CardHeader>
           <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Nombre</TableHead>
-                  <TableHead>Ciudad</TableHead>
-                  <TableHead>Direccion</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {data.locations.map((location) => (
-                  <TableRow key={location.id}>
-                    <TableCell className="font-medium">{location.name}</TableCell>
-                    <TableCell>{"city" in location ? location.city ?? "Sin ciudad" : "Sin ciudad"}</TableCell>
-                    <TableCell>{"address" in location ? location.address ?? "Sin direccion" : "Sin direccion"}</TableCell>
+            {data.locations.length === 0 ? (
+              <EmptyState icon={Building2} title="Sin sedes" description="Las sedes se mostraran aqui cuando se registren en la empresa." />
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Nombre</TableHead>
+                    <TableHead>Ciudad</TableHead>
+                    <TableHead>Direccion</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {data.locations.map((location) => (
+                    <TableRow key={location.id}>
+                      <TableCell className="font-medium">{location.name}</TableCell>
+                      <TableCell>{"city" in location ? location.city ?? "Sin ciudad" : "Sin ciudad"}</TableCell>
+                      <TableCell>{"address" in location ? location.address ?? "Sin direccion" : "Sin direccion"}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
           </CardContent>
         </Card>
 

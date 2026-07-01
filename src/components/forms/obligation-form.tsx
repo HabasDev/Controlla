@@ -76,6 +76,9 @@ export function ObligationForm({
           if (result.ok) {
             if (!obligationId) {
               form.reset();
+              if (result.data?.obligationId) {
+                router.push(`/dashboard/obligaciones/${result.data.obligationId}`);
+              }
             }
             router.refresh();
           }

@@ -1,5 +1,8 @@
+import { Users } from "lucide-react";
+
 import { InviteMemberForm } from "@/components/forms/invite-member-form";
 import { MemberAccessControls } from "@/features/members/components/member-access-controls";
+import { EmptyState } from "@/components/shared/empty-state";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -35,37 +38,41 @@ export default async function TeamPage() {
             <CardTitle>Miembros</CardTitle>
           </CardHeader>
           <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Nombre</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Rol</TableHead>
-                  <TableHead>Estado</TableHead>
-                  <TableHead>Acceso</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {data.members.map((member) => (
-                  <TableRow key={member.id}>
-                    <TableCell className="font-medium">{member.fullName}</TableCell>
-                    <TableCell>{member.email}</TableCell>
-                    <TableCell>
-                      <Badge variant="secondary">{member.role}</Badge>
-                    </TableCell>
-                    <TableCell>{member.status}</TableCell>
-                    <TableCell>
-                      <MemberAccessControls
-                        companyId={companyId}
-                        disabled={data.isDemo}
-                        role={member.role}
-                        userId={member.userId}
-                      />
-                    </TableCell>
+            {data.members.length === 0 ? (
+              <EmptyState icon={Users} title="Sin miembros" description="Invita a tu primer usuario para compartir el panel de empresa." />
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Nombre</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Rol</TableHead>
+                    <TableHead>Estado</TableHead>
+                    <TableHead>Acceso</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {data.members.map((member) => (
+                    <TableRow key={member.id}>
+                      <TableCell className="font-medium">{member.fullName}</TableCell>
+                      <TableCell>{member.email}</TableCell>
+                      <TableCell>
+                        <Badge variant="secondary">{member.role}</Badge>
+                      </TableCell>
+                      <TableCell>{member.status}</TableCell>
+                      <TableCell>
+                        <MemberAccessControls
+                          companyId={companyId}
+                          disabled={data.isDemo}
+                          role={member.role}
+                          userId={member.userId}
+                        />
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
           </CardContent>
         </Card>
       </div>

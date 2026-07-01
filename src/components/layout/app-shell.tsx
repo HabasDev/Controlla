@@ -28,11 +28,11 @@ export function AppShell({
 }) {
   return (
     <div className="min-h-screen overflow-x-hidden bg-[#020814] text-slate-100">
-      <div className="fixed inset-0 bg-[radial-gradient(circle_at_58%_18%,rgba(20,184,166,0.10),transparent_30rem),linear-gradient(180deg,#020814,#03101c_54%,#020814)]" />
-      <div className="fixed inset-0 control-grid opacity-[0.045]" />
-      <aside className="fixed inset-y-0 left-0 hidden w-64 border-r border-cyan-200/10 bg-slate-950/70 text-white backdrop-blur-xl lg:block">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(45,212,191,0.16),transparent_18rem)]" />
-        <div className="relative flex h-full flex-col">
+      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_58%_18%,rgba(20,184,166,0.10),transparent_30rem),linear-gradient(180deg,#020814,#03101c_54%,#020814)]" />
+      <div className="pointer-events-none fixed inset-0 control-grid opacity-[0.045]" />
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 border-r border-cyan-200/10 bg-slate-950/70 text-white backdrop-blur-xl lg:block">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(45,212,191,0.16),transparent_18rem)]" />
+        <div className="relative z-10 flex h-full flex-col">
         <div className="flex h-24 items-center gap-3 border-b border-cyan-200/10 px-5">
           <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-cyan-200/20 bg-cyan-300/8 text-cyan-200 shadow-[0_0_28px_rgba(34,211,238,0.12)]">
             <Eye className="h-6 w-6" aria-hidden="true" />
@@ -97,9 +97,9 @@ export function AppShell({
           </Link>
           <div className="flex items-center gap-3">
             <CommandPalette />
-            <button className="hidden h-10 w-10 items-center justify-center rounded-full border border-cyan-200/10 bg-white/[0.03] text-slate-300 hover:text-cyan-100 lg:inline-flex" type="button" aria-label="Notificaciones">
+            <Link className="hidden h-10 w-10 items-center justify-center rounded-full border border-cyan-200/10 bg-white/[0.03] text-slate-300 hover:text-cyan-100 lg:inline-flex" href="/dashboard/obligaciones" aria-label="Ver obligaciones pendientes">
               <Bell className="h-4 w-4" aria-hidden="true" />
-            </button>
+            </Link>
             <div className="hidden h-10 w-10 items-center justify-center rounded-full border border-cyan-200/10 bg-cyan-300/10 text-cyan-100 lg:flex">
               {user?.fullName?.slice(0, 1).toUpperCase() ?? <UserRound className="h-4 w-4" aria-hidden="true" />}
             </div>

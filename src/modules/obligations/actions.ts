@@ -3,14 +3,26 @@
 import { randomUUID } from "crypto";
 
 import { and, eq } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
 
-import { requireDb } from "@/db";
+import { getDb, requireDb } from "@/db";
 import { assets, companyMembers, locations, obligationTypes, obligations, reminderRules } from "@/db/schema";
 import { requirePermission } from "@/lib/auth/session";
 import { calculateNextDueDate } from "@/lib/date/obligations";
+import { allowsDemoMode } from "@/lib/env";
 import { obligationSchema, type ObligationInput } from "@/lib/validations/obligation";
 import { zodFieldErrors } from "@/lib/validations/shared";
 import { createActivityLog } from "@/modules/audit-log/service";
+import {
+  cancelDemoObligation,
+  completeDemoObligation,
+  createDemoObligation,
+  createNextDemoRenewal,
+  duplicateDemoObligation,
+  isDemoCompanyId,
+  reviewDemoObligation,
+  updateDemoObligation
+} from "@/modules/demo/store";
 import { buildDefaultReminderRules } from "@/modules/reminders/service";
 import type { ActionResult, FrequencyUnit } from "@/types";
 
@@ -24,6 +36,15 @@ function nullableDate(value: string | undefined) {
 
 function moneyValue(value: number | undefined) {
   return typeof value === "number" ? value.toFixed(2) : null;
+}
+
+function revalidateObligationViews(obligationId?: string) {
+  revalidatePath("/dashboard");
+  revalidatePath("/dashboard/obligaciones");
+
+  if (obligationId) {
+    revalidatePath(`/dashboard/obligaciones/${obligationId}`);
+  }
 }
 
 async function verifyObligationReferences(input: ObligationInput) {
@@ -80,6 +101,12 @@ export async function createObligationAction(input: ObligationInput): Promise<Ac
 
   if (!parsed.success) {
     return { ok: false, message: "Revisa los datos de la obligacion.", fieldErrors: zodFieldErrors(parsed.error) };
+  }
+
+  if ((!getDb() || isDemoCompanyId(parsed.data.companyId)) && allowsDemoMode()) {
+    const obligation = await createDemoObligation(parsed.data);
+    revalidateObligationViews(obligation.id);
+    return { ok: true, data: { obligationId: obligation.id }, message: "Obligacion creada en modo demo." };
   }
 
   const { user } = await requirePermission(parsed.data.companyId, "obligations:manage");
@@ -148,10 +175,23 @@ export async function createObligationAction(input: ObligationInput): Promise<Ac
     metadata: { title: parsed.data.title }
   });
 
+  revalidateObligationViews(obligation.id);
+
   return { ok: true, data: { obligationId: obligation.id }, message: "Obligacion creada." };
 }
 
 export async function completeObligationAction(companyId: string, obligationId: string): Promise<ActionResult> {
+  if ((!getDb() || isDemoCompanyId(companyId)) && allowsDemoMode()) {
+    const obligation = await completeDemoObligation(obligationId);
+
+    if (!obligation) {
+      return { ok: false, message: "No se encontro la obligacion." };
+    }
+
+    revalidateObligationViews(obligationId);
+    return { ok: true, message: "Obligacion completada en modo demo." };
+  }
+
   const { user } = await requirePermission(companyId, "obligations:manage");
   const db = requireDb();
 
@@ -233,7 +273,83 @@ export async function completeObligationAction(companyId: string, obligationId: 
     action: "obligation.completed"
   });
 
+  revalidateObligationViews(obligationId);
+
   return { ok: true, message: "Obligacion completada." };
+}
+
+export async function reviewObligationAction(companyId: string, obligationId: string): Promise<ActionResult> {
+  if ((!getDb() || isDemoCompanyId(companyId)) && allowsDemoMode()) {
+    const obligation = await reviewDemoObligation(obligationId);
+
+    if (!obligation) {
+      return { ok: false, message: "No se encontro la obligacion." };
+    }
+
+    revalidateObligationViews(obligationId);
+    return { ok: true, message: "Obligacion revisada en modo demo." };
+  }
+
+  const { user } = await requirePermission(companyId, "obligations:manage");
+  const db = requireDb();
+  const obligation = await db.query.obligations.findFirst({
+    where: and(eq(obligations.id, obligationId), eq(obligations.companyId, companyId))
+  });
+
+  if (!obligation) {
+    return { ok: false, message: "No se encontro la obligacion." };
+  }
+
+  await db
+    .update(obligations)
+    .set({
+      status: obligation.status === "expired" ? "active" : obligation.status
+    })
+    .where(and(eq(obligations.id, obligationId), eq(obligations.companyId, companyId)));
+
+  await createActivityLog({
+    companyId,
+    actorUserId: user.id,
+    entityType: "obligation",
+    entityId: obligationId,
+    action: "obligation.reviewed",
+    metadata: { title: obligation.title }
+  });
+
+  revalidateObligationViews(obligationId);
+
+  return { ok: true, message: "Obligacion revisada." };
+}
+
+export async function resolveObligationAction(companyId: string, obligationId: string): Promise<ActionResult> {
+  if ((!getDb() || isDemoCompanyId(companyId)) && allowsDemoMode()) {
+    const obligation = await completeDemoObligation(obligationId, "resolved");
+
+    if (!obligation) {
+      return { ok: false, message: "No se encontro la obligacion." };
+    }
+
+    revalidateObligationViews(obligationId);
+    return { ok: true, message: "Obligacion resuelta en modo demo." };
+  }
+
+  const result = await completeObligationAction(companyId, obligationId);
+
+  if (!result.ok) {
+    return result;
+  }
+
+  await createActivityLog({
+    companyId,
+    actorUserId: null,
+    entityType: "obligation",
+    entityId: obligationId,
+    action: "obligation.resolved"
+  });
+
+  revalidateObligationViews(obligationId);
+
+  return { ok: true, message: "Obligacion resuelta." };
 }
 
 export async function updateObligationAction(
@@ -249,6 +365,17 @@ export async function updateObligationAction(
 
   if (parsed.data.companyId !== companyId) {
     return { ok: false, message: "La obligacion no pertenece a la empresa activa." };
+  }
+
+  if ((!getDb() || isDemoCompanyId(companyId)) && allowsDemoMode()) {
+    const obligation = await updateDemoObligation(obligationId, parsed.data);
+
+    if (!obligation) {
+      return { ok: false, message: "No se encontro la obligacion." };
+    }
+
+    revalidateObligationViews(obligationId);
+    return { ok: true, message: "Obligacion actualizada en modo demo." };
   }
 
   const { user } = await requirePermission(companyId, "obligations:manage");
@@ -304,10 +431,23 @@ export async function updateObligationAction(
     metadata: { title: parsed.data.title }
   });
 
+  revalidateObligationViews(obligationId);
+
   return { ok: true, message: "Obligacion actualizada." };
 }
 
 export async function createNextRenewalAction(companyId: string, obligationId: string): Promise<ActionResult<{ obligationId: string }>> {
+  if ((!getDb() || isDemoCompanyId(companyId)) && allowsDemoMode()) {
+    const next = await createNextDemoRenewal(obligationId);
+
+    if (!next) {
+      return { ok: false, message: "Esta obligacion no tiene recurrencia configurada." };
+    }
+
+    revalidateObligationViews(next.id);
+    return { ok: true, data: { obligationId: next.id }, message: "Proxima renovacion creada en modo demo." };
+  }
+
   const { user } = await requirePermission(companyId, "obligations:manage");
   const db = requireDb();
 
@@ -378,10 +518,23 @@ export async function createNextRenewalAction(companyId: string, obligationId: s
     metadata: { renewedFrom: obligationId }
   });
 
+  revalidateObligationViews(nextObligation.id);
+
   return { ok: true, data: { obligationId: nextObligation.id }, message: "Proxima renovacion creada." };
 }
 
 export async function cancelObligationAction(companyId: string, obligationId: string): Promise<ActionResult> {
+  if ((!getDb() || isDemoCompanyId(companyId)) && allowsDemoMode()) {
+    const obligation = await cancelDemoObligation(obligationId);
+
+    if (!obligation) {
+      return { ok: false, message: "No se encontro la obligacion." };
+    }
+
+    revalidateObligationViews(obligationId);
+    return { ok: true, message: "Obligacion cancelada en modo demo." };
+  }
+
   const { user } = await requirePermission(companyId, "obligations:manage");
   const db = requireDb();
 
@@ -398,10 +551,23 @@ export async function cancelObligationAction(companyId: string, obligationId: st
     action: "obligation.cancelled"
   });
 
+  revalidateObligationViews(obligationId);
+
   return { ok: true, message: "Obligacion cancelada." };
 }
 
 export async function duplicateObligationAction(companyId: string, obligationId: string): Promise<ActionResult<{ obligationId: string }>> {
+  if ((!getDb() || isDemoCompanyId(companyId)) && allowsDemoMode()) {
+    const duplicated = await duplicateDemoObligation(obligationId);
+
+    if (!duplicated) {
+      return { ok: false, message: "No se encontro la obligacion." };
+    }
+
+    revalidateObligationViews(duplicated.id);
+    return { ok: true, data: { obligationId: duplicated.id }, message: "Obligacion duplicada en modo demo." };
+  }
+
   const { user } = await requirePermission(companyId, "obligations:manage");
   const db = requireDb();
 
@@ -455,6 +621,8 @@ export async function duplicateObligationAction(companyId: string, obligationId:
     action: "obligation.created",
     metadata: { duplicatedFrom: obligationId }
   });
+
+  revalidateObligationViews(duplicated.id);
 
   return { ok: true, data: { obligationId: duplicated.id }, message: "Obligacion duplicada." };
 }
