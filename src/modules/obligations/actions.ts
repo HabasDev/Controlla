@@ -52,6 +52,7 @@ async function verifyObligationReferences(input: ObligationInput) {
   const locationId = nullableId(input.locationId);
   const assetId = nullableId(input.assetId);
   const responsibleUserId = nullableId(input.responsibleUserId);
+  const obligationTypeId = input.obligationTypeId;
 
   if (locationId) {
     const location = await db.query.locations.findFirst({
@@ -87,13 +88,45 @@ async function verifyObligationReferences(input: ObligationInput) {
     }
   }
 
+  if (!obligationTypeId) {
+    throw new Error("Indica un tipo de tarea valido.");
+  }
+
   const type = await db.query.obligationTypes.findFirst({
-    where: eq(obligationTypes.id, input.obligationTypeId)
+    where: eq(obligationTypes.id, obligationTypeId)
   });
 
   if (!type || (type.companyId !== null && type.companyId !== input.companyId)) {
     throw new Error("El tipo de obligacion no pertenece a esta empresa.");
   }
+}
+
+async function resolveObligationTypeId(companyId: string, input: ObligationInput) {
+  if (input.obligationTypeId) {
+    return input.obligationTypeId;
+  }
+
+  const db = requireDb();
+  const name = input.customObligationTypeName?.trim() || "Tarea";
+  const existing = await db.query.obligationTypes.findFirst({
+    where: and(eq(obligationTypes.companyId, companyId), eq(obligationTypes.name, name))
+  });
+
+  if (existing) {
+    return existing.id;
+  }
+
+  const [created] = await db
+    .insert(obligationTypes)
+    .values({
+      companyId,
+      name,
+      category: "custom",
+      isSystemTemplate: false
+    })
+    .returning({ id: obligationTypes.id });
+
+  return created.id;
 }
 
 export async function createObligationAction(input: ObligationInput): Promise<ActionResult<{ obligationId: string }>> {
@@ -111,19 +144,21 @@ export async function createObligationAction(input: ObligationInput): Promise<Ac
 
   const { user } = await requirePermission(parsed.data.companyId, "obligations:manage");
   const db = requireDb();
+  const obligationTypeId = await resolveObligationTypeId(parsed.data.companyId, parsed.data);
+  const obligationInput = { ...parsed.data, obligationTypeId };
 
   try {
-    await verifyObligationReferences(parsed.data);
+    await verifyObligationReferences(obligationInput);
   } catch (error) {
     return { ok: false, message: error instanceof Error ? error.message : "No se pudo validar la obligacion." };
   }
 
-  const recurrenceUnit = parsed.data.recurrenceEnabled ? (parsed.data.recurrenceUnit as FrequencyUnit) : null;
-  const recurrenceInterval = parsed.data.recurrenceEnabled ? parsed.data.recurrenceInterval : null;
+  const recurrenceUnit = obligationInput.recurrenceEnabled ? (obligationInput.recurrenceUnit as FrequencyUnit) : null;
+  const recurrenceInterval = obligationInput.recurrenceEnabled ? obligationInput.recurrenceInterval : null;
   const nextDueDate =
-    parsed.data.recurrenceEnabled && recurrenceUnit && recurrenceInterval
+    obligationInput.recurrenceEnabled && recurrenceUnit && recurrenceInterval
       ? calculateNextDueDate({
-          fromDate: parsed.data.dueDate,
+          fromDate: obligationInput.dueDate,
           unit: recurrenceUnit,
           interval: recurrenceInterval
         })
@@ -132,25 +167,25 @@ export async function createObligationAction(input: ObligationInput): Promise<Ac
   const [obligation] = await db
     .insert(obligations)
     .values({
-      companyId: parsed.data.companyId,
-      locationId: nullableId(parsed.data.locationId),
-      assetId: nullableId(parsed.data.assetId),
-      obligationTypeId: parsed.data.obligationTypeId,
-      title: parsed.data.title,
-      description: parsed.data.description,
-      status: parsed.data.status,
-      priority: parsed.data.priority,
-      responsibleUserId: nullableId(parsed.data.responsibleUserId),
-      startDate: nullableDate(parsed.data.startDate),
-      dueDate: parsed.data.dueDate,
-      recurrenceEnabled: parsed.data.recurrenceEnabled,
+      companyId: obligationInput.companyId,
+      locationId: nullableId(obligationInput.locationId),
+      assetId: nullableId(obligationInput.assetId),
+      obligationTypeId,
+      title: obligationInput.title,
+      description: obligationInput.description,
+      status: obligationInput.status,
+      priority: obligationInput.priority,
+      responsibleUserId: nullableId(obligationInput.responsibleUserId),
+      startDate: nullableDate(obligationInput.startDate),
+      dueDate: obligationInput.dueDate,
+      recurrenceEnabled: obligationInput.recurrenceEnabled,
       recurrenceUnit,
       recurrenceInterval,
-      autoCreateNext: parsed.data.autoCreateNext,
+      autoCreateNext: obligationInput.autoCreateNext,
       nextDueDate,
-      estimatedCost: moneyValue(parsed.data.estimatedCost),
-      actualCost: moneyValue(parsed.data.actualCost),
-      notes: parsed.data.notes
+      estimatedCost: moneyValue(obligationInput.estimatedCost),
+      actualCost: moneyValue(obligationInput.actualCost),
+      notes: obligationInput.notes
     })
     .returning({ id: obligations.id });
 
@@ -158,7 +193,7 @@ export async function createObligationAction(input: ObligationInput): Promise<Ac
 
   await db.insert(reminderRules).values(
     rules.map((rule) => ({
-      companyId: parsed.data.companyId,
+      companyId: obligationInput.companyId,
       obligationId: obligation.id,
       daysBeforeDue: rule.daysBeforeDue,
       channel: rule.channel,
@@ -167,12 +202,12 @@ export async function createObligationAction(input: ObligationInput): Promise<Ac
   );
 
   await createActivityLog({
-    companyId: parsed.data.companyId,
+    companyId: obligationInput.companyId,
     actorUserId: user.id,
     entityType: "obligation",
     entityId: obligation.id,
     action: "obligation.created",
-    metadata: { title: parsed.data.title }
+    metadata: { title: obligationInput.title }
   });
 
   revalidateObligationViews(obligation.id);
@@ -380,19 +415,21 @@ export async function updateObligationAction(
 
   const { user } = await requirePermission(companyId, "obligations:manage");
   const db = requireDb();
+  const obligationTypeId = await resolveObligationTypeId(companyId, parsed.data);
+  const obligationInput = { ...parsed.data, obligationTypeId };
 
   try {
-    await verifyObligationReferences(parsed.data);
+    await verifyObligationReferences(obligationInput);
   } catch (error) {
     return { ok: false, message: error instanceof Error ? error.message : "No se pudo validar la obligacion." };
   }
 
-  const recurrenceUnit = parsed.data.recurrenceEnabled ? (parsed.data.recurrenceUnit as FrequencyUnit) : null;
-  const recurrenceInterval = parsed.data.recurrenceEnabled ? parsed.data.recurrenceInterval : null;
+  const recurrenceUnit = obligationInput.recurrenceEnabled ? (obligationInput.recurrenceUnit as FrequencyUnit) : null;
+  const recurrenceInterval = obligationInput.recurrenceEnabled ? obligationInput.recurrenceInterval : null;
   const nextDueDate =
-    parsed.data.recurrenceEnabled && recurrenceUnit && recurrenceInterval
+    obligationInput.recurrenceEnabled && recurrenceUnit && recurrenceInterval
       ? calculateNextDueDate({
-          fromDate: parsed.data.dueDate,
+          fromDate: obligationInput.dueDate,
           unit: recurrenceUnit,
           interval: recurrenceInterval
         })
@@ -401,24 +438,24 @@ export async function updateObligationAction(
   await db
     .update(obligations)
     .set({
-      locationId: nullableId(parsed.data.locationId),
-      assetId: nullableId(parsed.data.assetId),
-      obligationTypeId: parsed.data.obligationTypeId,
-      title: parsed.data.title,
-      description: parsed.data.description,
-      status: parsed.data.status,
-      priority: parsed.data.priority,
-      responsibleUserId: nullableId(parsed.data.responsibleUserId),
-      startDate: nullableDate(parsed.data.startDate),
-      dueDate: parsed.data.dueDate,
-      recurrenceEnabled: parsed.data.recurrenceEnabled,
+      locationId: nullableId(obligationInput.locationId),
+      assetId: nullableId(obligationInput.assetId),
+      obligationTypeId,
+      title: obligationInput.title,
+      description: obligationInput.description,
+      status: obligationInput.status,
+      priority: obligationInput.priority,
+      responsibleUserId: nullableId(obligationInput.responsibleUserId),
+      startDate: nullableDate(obligationInput.startDate),
+      dueDate: obligationInput.dueDate,
+      recurrenceEnabled: obligationInput.recurrenceEnabled,
       recurrenceUnit,
       recurrenceInterval,
-      autoCreateNext: parsed.data.autoCreateNext,
+      autoCreateNext: obligationInput.autoCreateNext,
       nextDueDate,
-      estimatedCost: moneyValue(parsed.data.estimatedCost),
-      actualCost: moneyValue(parsed.data.actualCost),
-      notes: parsed.data.notes
+      estimatedCost: moneyValue(obligationInput.estimatedCost),
+      actualCost: moneyValue(obligationInput.actualCost),
+      notes: obligationInput.notes
     })
     .where(and(eq(obligations.id, obligationId), eq(obligations.companyId, companyId)));
 
@@ -428,7 +465,7 @@ export async function updateObligationAction(
     entityType: "obligation",
     entityId: obligationId,
     action: "obligation.updated",
-    metadata: { title: parsed.data.title }
+    metadata: { title: obligationInput.title }
   });
 
   revalidateObligationViews(obligationId);

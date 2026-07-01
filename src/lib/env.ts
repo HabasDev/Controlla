@@ -12,7 +12,7 @@ export const appEnv = {
     return process.env.NEXT_PUBLIC_SUPABASE_URL;
   },
   get supabaseAnonKey() {
-    return process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    return process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
   },
   get supabaseServiceRoleKey() {
     return process.env.SUPABASE_SERVICE_ROLE_KEY;

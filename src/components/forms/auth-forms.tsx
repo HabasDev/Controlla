@@ -15,16 +15,16 @@ import { Label } from "@/components/ui/label";
 import { forgotPasswordAction, loginAction, registerAction } from "@/modules/auth/actions";
 
 const loginSchema = z.object({
-  email: z.string().email("Introduce un email valido."),
+  email: z.string().trim().email("Introduce un email válido."),
   password: z.string().min(8, "Minimo 8 caracteres.")
 });
 
 const registerSchema = loginSchema.extend({
-  fullName: z.string().min(2, "Indica tu nombre.")
+  fullName: z.string().trim().min(2, "Indica tu nombre.")
 });
 
 const forgotSchema = z.object({
-  email: z.string().email("Introduce un email valido.")
+  email: z.string().trim().email("Introduce un email válido.")
 });
 
 type LoginValues = z.infer<typeof loginSchema>;
@@ -75,7 +75,7 @@ export function LoginForm() {
       </div>
       <div className="space-y-2">
         <Label className={authLabelClass} htmlFor="password">
-          Contrasena
+          Contraseña
         </Label>
         <div className="relative">
           <Input className={authInputClass} id="password" type="password" {...form.register("password")} />
@@ -92,7 +92,7 @@ export function LoginForm() {
           Recordarme
         </label>
         <Link className="font-medium text-teal-300 hover:text-teal-200" href="/forgot-password">
-          Olvidaste tu contrasena?
+          Olvidaste tu contraseña?
         </Link>
       </div>
       <Button className={`w-full ${authButtonClass}`} disabled={isPending} type="submit">
@@ -144,7 +144,7 @@ export function RegisterForm() {
       </div>
       <div className="space-y-2">
         <Label className={authLabelClass} htmlFor="password">
-          Contrasena
+          Contraseña
         </Label>
         <Input className={authInputClass} id="password" type="password" {...form.register("password")} />
         <p className="text-xs text-critical">{form.formState.errors.password?.message}</p>

@@ -13,7 +13,7 @@ export default function OnboardingPage() {
   const steps = [
     {
       title: "Empresa",
-      description: "Define la entidad sobre la que se aislaran obligaciones, documentos y equipo.",
+      description: "Define la entidad sobre la que se aislarán obligaciones, documentos y equipo.",
       icon: Building2,
       active: true
     },
@@ -23,23 +23,23 @@ export default function OnboardingPage() {
       icon: Radar
     },
     {
-      title: "Documentacion",
+      title: "Documentación",
       description: "Adjunta archivos privados cuando exista soporte real de Supabase.",
       icon: FileCheck2
     }
   ];
 
   return (
-    <div className="grid w-full max-w-5xl gap-5 lg:grid-cols-[320px_1fr]">
+    <div className="grid w-full gap-5">
       <aside className="dark-control-surface overflow-hidden rounded-lg p-5 text-white">
         <div className="mb-8">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-cyan-200">Puesta en marcha</p>
           <h1 className="mt-3 text-2xl font-semibold tracking-tight">Lleva la empresa al primer estado controlado.</h1>
           <p className="mt-3 text-sm leading-6 text-slate-300">
-            El onboarding empieza por la empresa activa. Despues podras crear obligaciones, asociar activos y subir documentos.
+            El onboarding empieza por la empresa activa. Después podrás crear obligaciones, asociar activos y subir documentos.
           </p>
         </div>
-        <div className="space-y-3">
+        <div className="grid gap-3 md:grid-cols-3">
           {steps.map((step, index) => (
             <div className="flex gap-3 rounded-lg border border-white/10 bg-white/[0.04] p-3" key={step.title}>
               <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-cyan-200/25 bg-cyan-200/10">
@@ -60,7 +60,7 @@ export default function OnboardingPage() {
         <CardHeader>
           <CardTitle>Crea tu empresa</CardTitle>
           <CardDescription>
-            Esta sera la empresa activa inicial. Podras añadir sedes, usuarios, activos y obligaciones despues.
+            Esta será la empresa activa inicial. Podrás añadir sedes, usuarios, activos y obligaciones después.
           </CardDescription>
         </CardHeader>
         <CardContent>

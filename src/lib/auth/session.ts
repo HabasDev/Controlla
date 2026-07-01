@@ -33,11 +33,17 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
   }
 
   const db = getDb();
-  const profile = db
-    ? await db.query.profiles.findFirst({
+  let profile = null;
+
+  if (db) {
+    try {
+      profile = await db.query.profiles.findFirst({
         where: eq(profiles.id, user.id)
-      })
-    : null;
+      });
+    } catch {
+      profile = null;
+    }
+  }
 
   return {
     id: user.id,
@@ -61,8 +67,8 @@ export async function setActiveCompanyCookie(companyId: string) {
   });
 }
 
-export async function getCurrentCompany(preferredCompanyId?: string) {
-  const user = await getCurrentUser();
+export async function getCurrentCompany(preferredCompanyId?: string, currentUser?: CurrentUser | null) {
+  const user = currentUser === undefined ? await getCurrentUser() : currentUser;
   const db = getDb();
 
   if (!user || !db) {
@@ -71,16 +77,27 @@ export async function getCurrentCompany(preferredCompanyId?: string) {
 
   const cookieCompanyId = preferredCompanyId ?? (await getActiveCompanyIdFromCookie());
 
-  const memberships = await db
-    .select({
-      companyId: companies.id,
-      name: companies.name,
-      timezone: companies.timezone,
-      role: companyMembers.role
-    })
-    .from(companyMembers)
-    .innerJoin(companies, eq(companyMembers.companyId, companies.id))
-    .where(and(eq(companyMembers.userId, user.id), eq(companyMembers.status, "active")));
+  let memberships: {
+    companyId: string;
+    name: string;
+    timezone: string;
+    role: CompanyRole;
+  }[] = [];
+
+  try {
+    memberships = await db
+      .select({
+        companyId: companies.id,
+        name: companies.name,
+        timezone: companies.timezone,
+        role: companyMembers.role
+      })
+      .from(companyMembers)
+      .innerJoin(companies, eq(companyMembers.companyId, companies.id))
+      .where(and(eq(companyMembers.userId, user.id), eq(companyMembers.status, "active")));
+  } catch {
+    return null;
+  }
 
   const selected = cookieCompanyId
     ? memberships.find((membership) => membership.companyId === cookieCompanyId)

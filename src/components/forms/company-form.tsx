@@ -40,7 +40,7 @@ export function CompanyForm({
 
   return (
     <form
-      className="grid gap-4 md:grid-cols-2"
+      className="grid gap-4 sm:grid-cols-2"
       onSubmit={form.handleSubmit((values) =>
         startTransition(async () => {
           if (disabled) {

@@ -43,7 +43,8 @@ export function ObligationForm({
     defaultValues: {
       companyId,
       title: initialValues?.title ?? "",
-      obligationTypeId: initialValues?.obligationTypeId ?? obligationTypes[0]?.id ?? "",
+      obligationTypeId: initialValues?.obligationTypeId ?? "",
+      customObligationTypeName: initialValues?.customObligationTypeName ?? "",
       assetId: initialValues?.assetId ?? "",
       locationId: initialValues?.locationId ?? "",
       responsibleUserId: initialValues?.responsibleUserId ?? "",
@@ -59,6 +60,7 @@ export function ObligationForm({
       reminderRules: []
     }
   });
+  const selectedTypeId = form.watch("obligationTypeId");
 
   return (
     <form
@@ -90,19 +92,33 @@ export function ObligationForm({
       </div>
       <input type="hidden" {...form.register("companyId")} />
       <div className="space-y-2 md:col-span-2">
-        <Label htmlFor="obligation-title">Titulo</Label>
-        <Input id="obligation-title" disabled={disabled} {...form.register("title")} />
+        <Label htmlFor="obligation-title">Tarea</Label>
+        <Input id="obligation-title" disabled={disabled} placeholder="Ej. Llamar al gestor, renovar seguro, revisar contrato..." {...form.register("title")} />
         <p className="text-xs text-critical">{form.formState.errors.title?.message}</p>
       </div>
       <div className="space-y-2">
         <Label htmlFor="obligation-type">Tipo</Label>
         <Select id="obligation-type" disabled={disabled} {...form.register("obligationTypeId")}>
+          <option value="">Tarea libre</option>
           {obligationTypes.map((type) => (
             <option key={type.id} value={type.id}>
               {type.name}
             </option>
           ))}
         </Select>
+        <p className="text-xs text-muted-foreground">Puedes elegir uno existente o escribir otro.</p>
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="obligation-custom-type">Tipo libre</Label>
+        <Input
+          id="obligation-custom-type"
+          disabled={disabled || Boolean(selectedTypeId)}
+          placeholder="Ej. Recado, compra, llamada, revision..."
+          {...form.register("customObligationTypeName")}
+        />
+        <p className="text-xs text-muted-foreground">
+          Si lo dejas vacio, se guardara como Tarea.
+        </p>
       </div>
       <div className="space-y-2">
         <Label htmlFor="obligation-due">Fecha de vencimiento</Label>

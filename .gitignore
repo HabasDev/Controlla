@@ -1,6 +1,7 @@
 .next
 node_modules
 .tools
+.agents
 .logs
 .env
 .env*.local
@@ -10,3 +11,4 @@ dist
 *.tsbuildinfo
 drizzle
 public/uploads
+skills-lock.json

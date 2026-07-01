@@ -5,10 +5,15 @@ import { getCurrentCompany, getCurrentUser } from "@/lib/auth/session";
 import { getMissingRuntimeWarnings, hasSupabaseConfig } from "@/lib/env";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const [user, company] = await Promise.all([getCurrentUser(), getCurrentCompany()]);
+  const user = await getCurrentUser();
+  const company = await getCurrentCompany(undefined, user);
 
   if (hasSupabaseConfig() && !user) {
     redirect("/login");
+  }
+
+  if (hasSupabaseConfig() && user && !company) {
+    redirect("/onboarding");
   }
 
   return (

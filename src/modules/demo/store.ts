@@ -95,11 +95,20 @@ export type DemoActivityRecord = {
   createdAt: string;
 };
 
+export type DemoObligationTypeRecord = {
+  id: string;
+  companyId: string | null;
+  name: string;
+  category: string;
+  isSystemTemplate: boolean;
+};
+
 export type DemoStore = {
   assets: DemoAssetRecord[];
   obligations: DemoObligationRecord[];
   documents: DemoDocumentRecord[];
   activity: DemoActivityRecord[];
+  obligationTypes: DemoObligationTypeRecord[];
 };
 
 let cachedStore: DemoStore | null = null;
@@ -126,6 +135,13 @@ function findResponsibleUserId(fullName: string) {
 
 function initialDemoStore(): DemoStore {
   const now = new Date().toISOString();
+  const obligationTypeRecords: DemoObligationTypeRecord[] = demoObligationTypes.map((type) => ({
+    id: type.id,
+    companyId: null,
+    name: type.name,
+    category: "demo",
+    isSystemTemplate: true
+  }));
   const assets: DemoAssetRecord[] = demoAssets.map((asset) => ({
     id: asset.id,
     companyId: demoCompany.id,
@@ -216,12 +232,27 @@ function initialDemoStore(): DemoStore {
     assets,
     obligations,
     documents,
-    activity
+    activity,
+    obligationTypes: obligationTypeRecords
   };
 }
 
 function cloneStore(store: DemoStore): DemoStore {
   return JSON.parse(JSON.stringify(store)) as DemoStore;
+}
+
+function normalizeStore(store: DemoStore): DemoStore {
+  if (!Array.isArray(store.obligationTypes)) {
+    store.obligationTypes = demoObligationTypes.map((type) => ({
+      id: type.id,
+      companyId: null,
+      name: type.name,
+      category: "demo",
+      isSystemTemplate: true
+    }));
+  }
+
+  return store;
 }
 
 async function readStore() {
@@ -231,7 +262,7 @@ async function readStore() {
 
   try {
     const content = await readFile(DEMO_STORE_PATH, "utf8");
-    cachedStore = JSON.parse(content) as DemoStore;
+    cachedStore = normalizeStore(JSON.parse(content) as DemoStore);
   } catch {
     cachedStore = initialDemoStore();
     await persistStore(cachedStore);
@@ -291,6 +322,30 @@ function buildNextDueDate(input: {
     unit: input.recurrenceUnit,
     interval: input.recurrenceInterval
   });
+}
+
+function resolveDemoObligationTypeId(store: DemoStore, input: ObligationInput) {
+  if (input.obligationTypeId) {
+    return input.obligationTypeId;
+  }
+
+  const name = input.customObligationTypeName?.trim() || "Tarea";
+  const existing = store.obligationTypes.find((type) => type.name.toLowerCase() === name.toLowerCase());
+
+  if (existing) {
+    return existing.id;
+  }
+
+  const type: DemoObligationTypeRecord = {
+    id: randomUUID(),
+    companyId: demoCompany.id,
+    name,
+    category: "custom",
+    isSystemTemplate: false
+  };
+
+  store.obligationTypes.push(type);
+  return type.id;
 }
 
 function cloneObligationForNext(obligation: DemoObligationRecord, dueDate: string): DemoObligationRecord {
@@ -397,7 +452,7 @@ export async function createDemoObligation(input: ObligationInput) {
       companyId: demoCompany.id,
       locationId: nullableId(input.locationId),
       assetId: nullableId(input.assetId),
-      obligationTypeId: input.obligationTypeId,
+      obligationTypeId: resolveDemoObligationTypeId(store, input),
       title: input.title,
       description: input.description ?? "",
       status: input.status,
@@ -451,7 +506,7 @@ export async function updateDemoObligation(obligationId: string, input: Obligati
 
     obligation.locationId = nullableId(input.locationId);
     obligation.assetId = nullableId(input.assetId);
-    obligation.obligationTypeId = input.obligationTypeId;
+    obligation.obligationTypeId = resolveDemoObligationTypeId(store, input);
     obligation.title = input.title;
     obligation.description = input.description ?? "";
     obligation.status = input.status;

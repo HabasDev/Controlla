@@ -25,6 +25,28 @@ export type LoginInput = z.infer<typeof authSchema>;
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
 
+function authErrorMessage(message: string) {
+  const normalized = message.toLowerCase();
+
+  if (normalized.includes("email rate limit exceeded")) {
+    return "Supabase ha bloqueado temporalmente el envio de emails. Espera unos minutos o desactiva la confirmacion por email para la demo.";
+  }
+
+  if (normalized.includes("user already registered")) {
+    return "Ya existe una cuenta con este email. Prueba a iniciar sesion.";
+  }
+
+  if (normalized.includes("invalid login credentials")) {
+    return "No se pudo iniciar sesion. Revisa el email y la contraseña.";
+  }
+
+  if (normalized.includes("email not confirmed")) {
+    return "Confirma el email antes de iniciar sesion o desactiva la confirmacion por email para la demo.";
+  }
+
+  return message;
+}
+
 export async function loginAction(input: LoginInput): Promise<ActionResult> {
   const parsed = authSchema.safeParse(input);
 
@@ -41,7 +63,7 @@ export async function loginAction(input: LoginInput): Promise<ActionResult> {
   const { error } = await supabase.auth.signInWithPassword(parsed.data);
 
   if (error) {
-    return { ok: false, message: "No se pudo iniciar sesion. Revisa el email y la contraseña." };
+    return { ok: false, message: authErrorMessage(error.message) };
   }
 
   return { ok: true, message: "Sesion iniciada." };
@@ -71,7 +93,7 @@ export async function registerAction(input: RegisterInput): Promise<ActionResult
   });
 
   if (error) {
-    return { ok: false, message: error.message };
+    return { ok: false, message: authErrorMessage(error.message) };
   }
 
   const db = getDb();
@@ -110,7 +132,7 @@ export async function forgotPasswordAction(input: ForgotPasswordInput): Promise<
   const { error } = await supabase.auth.resetPasswordForEmail(parsed.data.email);
 
   if (error) {
-    return { ok: false, message: error.message };
+    return { ok: false, message: authErrorMessage(error.message) };
   }
 
   return { ok: true, message: "Te hemos enviado instrucciones para recuperar el acceso." };

@@ -117,6 +117,12 @@ export default function MarketingPage() {
                 </div>
               </div>
               <LoginForm />
+              <Link
+                className="mt-3 flex h-12 w-full items-center justify-center rounded-md border border-teal-300/25 bg-teal-300/8 text-sm font-semibold text-teal-100 transition hover:bg-teal-300/14 hover:text-white"
+                href="/register"
+              >
+                Registrarse
+              </Link>
               <div className="mt-7 flex items-center gap-4 text-xs text-slate-500">
                 <span className="h-px flex-1 bg-white/10" />
                 <span>o continua con</span>

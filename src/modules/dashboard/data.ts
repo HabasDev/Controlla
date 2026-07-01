@@ -19,7 +19,7 @@ import { getCurrentCompany } from "@/lib/auth/session";
 import { getDaysUntilDueDate, getObligationStatus, type ComputedObligationStatus } from "@/lib/date/obligations";
 import { allowsDemoMode } from "@/lib/env";
 import { getPlanLimits } from "@/modules/billing/service";
-import { demoCompany, demoLocations, demoMembers, demoObligationTypes } from "@/modules/demo/data";
+import { demoCompany, demoLocations, demoMembers } from "@/modules/demo/data";
 import { getDemoStoreSnapshot, type DemoAssetRecord, type DemoDocumentRecord, type DemoObligationRecord, type DemoStore } from "@/modules/demo/store";
 import type { AssetStatus, CompanyMemberStatus, CompanyRole, FrequencyUnit, ObligationPriority, ObligationStatus } from "@/types";
 
@@ -110,8 +110,8 @@ function displayLocationName(locationId: string | null | undefined) {
   return demoLocations.find((location) => location.id === locationId)?.name ?? "Empresa";
 }
 
-function displayTypeName(obligationTypeId: string) {
-  return demoObligationTypes.find((type) => type.id === obligationTypeId)?.name ?? "Obligacion";
+function displayTypeName(store: DemoStore, obligationTypeId: string) {
+  return store.obligationTypes.find((type) => type.id === obligationTypeId)?.name ?? "Obligacion";
 }
 
 function displayAssetName(store: DemoStore, assetId: string | null | undefined) {
@@ -131,7 +131,7 @@ function toDemoObligation(store: DemoStore, obligation: DemoObligationRecord): D
     obligationTypeId: obligation.obligationTypeId,
     title: obligation.title,
     description: obligation.description,
-    typeName: displayTypeName(obligation.obligationTypeId),
+    typeName: displayTypeName(store, obligation.obligationTypeId),
     assetName: displayAssetName(store, obligation.assetId),
     locationName: displayLocationName(obligation.locationId),
     responsibleUserId: obligation.responsibleUserId ?? "",
@@ -703,7 +703,7 @@ export async function getFormOptionsData() {
     const store = await getDemoStoreSnapshot();
     return {
       company: demoCompanyContext(),
-      obligationTypes: demoObligationTypes,
+      obligationTypes: store.obligationTypes.map((type) => ({ id: type.id, name: type.name })),
       assets: store.assets.map((asset) => ({ id: asset.id, name: asset.name })),
       locations: demoLocations,
       members: demoMembers,

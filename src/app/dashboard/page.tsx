@@ -104,13 +104,6 @@ function RadarGraphic() {
 
 export default async function DashboardPage() {
   const data = await getDashboardData();
-  const statusCounts = {
-    normal: data.obligations.filter((item) => item.computedStatus === "normal").length,
-    warning: data.obligations.filter((item) => item.computedStatus === "warning").length,
-    expired: data.obligations.filter((item) => item.computedStatus === "expired" || item.computedStatus === "critical").length
-  };
-  const total = Math.max(statusCounts.normal + statusCounts.warning + statusCounts.expired, 1);
-  const health = Math.round((statusCounts.normal / total) * 100);
   const attentionCount = data.stats.expired + data.stats.dueToday + data.stats.dueIn7;
   const today = new Intl.DateTimeFormat("es-ES", { day: "2-digit", month: "long", year: "numeric", timeZone: data.company.timezone }).format(new Date());
   const activityItems = data.activity.slice(0, 4);
@@ -163,16 +156,17 @@ export default async function DashboardPage() {
           <div className="flex items-start justify-between">
             <div>
               <p className="text-xs font-bold uppercase tracking-[0.18em] text-cyan-300">Salud operativa</p>
-              <p className="mt-5 text-5xl font-semibold text-white">{health}%</p>
+              <p className="mt-5 text-3xl font-semibold text-white">Lo haremos</p>
+              <p className="mt-3 max-w-xs text-sm leading-6 text-slate-400">
+                Esta métrica queda pendiente hasta definir un criterio fiable con datos reales.
+              </p>
             </div>
             <div className="flex h-16 w-16 items-center justify-center rounded-full border border-cyan-300/14 bg-cyan-300/8 text-cyan-200">
               <HeartPulse className="h-7 w-7" aria-hidden="true" />
             </div>
           </div>
-          <div className="mt-7 flex h-2 overflow-hidden rounded-full bg-white/10">
-            <span className="bg-red-500" style={{ width: `${(statusCounts.expired / total) * 100}%` }} />
-            <span className="bg-amber-400" style={{ width: `${(statusCounts.warning / total) * 100}%` }} />
-            <span className="flex-1 bg-cyan-400" />
+          <div className="mt-7 h-2 overflow-hidden rounded-full bg-white/10">
+            <div className="h-full w-1/3 rounded-full bg-cyan-300/45" />
           </div>
           <svg className="mt-8 h-20 w-full" viewBox="0 0 260 80" aria-hidden="true">
             <path d="M4 58 35 44l31 12 31-36 31 30 31-38 31 20 31-26 35 16" fill="none" stroke="#22d3ee" strokeLinecap="round" strokeWidth="1.5" />

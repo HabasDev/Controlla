@@ -46,7 +46,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       <div className="absolute right-[-10rem] top-[14rem] h-20 w-[34rem] -rotate-45 bg-cyan-300/10" />
       <div className="absolute inset-0 control-grid opacity-[0.08]" />
 
-      <section className="relative z-10 mx-auto grid min-h-screen w-full max-w-6xl items-center gap-12 px-6 py-10 lg:grid-cols-[1fr_440px] lg:px-10">
+      <section className="relative z-10 mx-auto grid min-h-screen w-full max-w-7xl items-center gap-12 px-6 py-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(34rem,1.1fr)] lg:px-10">
         <div className="flex min-h-0 flex-col justify-between lg:min-h-[38rem]">
           <div>
             <Link className="inline-flex items-center gap-3 text-xl font-semibold" href="/">
@@ -89,7 +89,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           <p className="hidden text-sm text-slate-500 lg:block">2026 Controlla. Todos los derechos reservados.</p>
         </div>
 
-        <div className="mx-auto w-full max-w-md">{children}</div>
+        <div className="mx-auto w-full max-w-3xl">{children}</div>
       </section>
     </main>
   );
